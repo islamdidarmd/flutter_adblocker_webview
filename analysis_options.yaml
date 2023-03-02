@@ -1,4 +1,16 @@
-include: package:flutter_lints/flutter.yaml
+analyzer:
+  plugins:
+    - dart_code_metrics
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+dart_code_metrics:
+  metrics:
+    cyclomatic-complexity: 20
+    number-of-parameters: 4
+    maximum-nesting-level: 5
+  metrics-exclude:
+    - test/**
+  extends:
+    - package:dart_code_metrics/presets/all.yaml
+  anti-patterns:
+    - long-method
+    - long-parameter-list

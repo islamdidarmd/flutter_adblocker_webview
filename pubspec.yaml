@@ -1,4 +1,4 @@
-name: adblocker_webview_flutter
+name: adblocker_webview
 description: A adblocker webview for flutter
 version: 0.0.1
 homepage: none
@@ -11,10 +11,13 @@ dependencies:
   flutter:
     sdk: flutter
 
+  get_it: ^7.2.0
+  injectable: ^2.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  dart_code_metrics: ^5.6.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
