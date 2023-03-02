@@ -5,10 +5,12 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dart'
+import 'package:adblocker_webview/src/data/repository/adblocker_repository_impl.dart'
     as _i4;
-import 'package:adblocker_webview/src/domain/use_case/fetch_banned_host_use_case.dart'
+import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dart'
     as _i3;
+import 'package:adblocker_webview/src/domain/use_case/fetch_banned_host_use_case.dart'
+    as _i5;
 import 'package:get_it/get_it.dart' as _i1;
 import 'package:injectable/injectable.dart'
     as _i2; // ignore_for_file: unnecessary_lambdas
@@ -25,8 +27,9 @@ extension GetItInjectableX on _i1.GetIt {
       environment,
       environmentFilter,
     );
-    gh.factory<_i3.FetchBannedHostUseCase>(() => _i3.FetchBannedHostUseCase(
-        adBlockerRepository: gh<_i4.AdBlockerRepository>()));
+    gh.factory<_i3.AdBlockerRepository>(() => _i4.AdBlockerRepositoryImpl());
+    gh.factory<_i5.FetchBannedHostUseCase>(() => _i5.FetchBannedHostUseCase(
+        adBlockerRepository: gh<_i3.AdBlockerRepository>()));
     return this;
   }
 }

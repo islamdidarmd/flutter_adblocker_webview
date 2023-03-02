@@ -12,7 +12,6 @@ class FetchBannedHostUseCase {
   });
 
   Future<List<Host>> execute() async {
-
-    return [];
+    return await adBlockerRepository.fetchBannedHostList();
   }
 }
