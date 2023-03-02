@@ -6,7 +6,7 @@ import 'service_locator.config.dart';
 class ServiceLocator {
   static final GetIt instance = GetIt.asNewInstance();
 
-  static T get<T extends Object>() => ServiceLocator.get<T>();
+  static T get<T extends Object>() => instance.get<T>();
 }
 
 @InjectableInit(initializerName: 'initGetIt', preferRelativeImports: true)

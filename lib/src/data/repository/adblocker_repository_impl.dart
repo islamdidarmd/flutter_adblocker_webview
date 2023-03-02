@@ -1,5 +1,5 @@
-import 'package:adblocker_webview/src/domain/entity/host.dart';
-import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dart';
+import '../../domain/entity/host.dart';
+import '../../domain/repository/adblocker_repository.dart';
 import 'package:injectable/injectable.dart';
 
 @Injectable(as: AdBlockerRepository)

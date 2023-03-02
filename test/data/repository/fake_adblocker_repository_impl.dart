@@ -6,8 +6,8 @@ class FakeAdBlockerRepositoryImpl implements AdBlockerRepository {
   @override
   Future<List<Host>> fetchBannedHostList() async {
     return [
-      Host(url: "google.com"),
-      Host(url: "facebook.com"),
+      Host(domain: "google.com"),
+      Host(domain: "facebook.com"),
     ];
   }
 }

@@ -1,7 +1,7 @@
 class Host {
-  final String url;
+  final String domain;
 
   const Host({
-    required this.url,
+    required this.domain,
   });
 }

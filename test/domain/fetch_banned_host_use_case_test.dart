@@ -10,12 +10,13 @@ void main() {
 
   setUp(() async {
     await getIt.reset();
-    getIt.registerFactory<AdBlockerRepository>(
-      () => FakeAdBlockerRepositoryImpl(),
-    );
-    getIt.registerFactory<FetchBannedHostUseCase>(
-      () => FetchBannedHostUseCase(adBlockerRepository: getIt.get()),
-    );
+    getIt
+      ..registerFactory<AdBlockerRepository>(
+        () => FakeAdBlockerRepositoryImpl(),
+      )
+      ..registerFactory<FetchBannedHostUseCase>(
+        () => FetchBannedHostUseCase(adBlockerRepository: getIt.get()),
+      );
   });
 
   test('Test UseCase Returns at least one host', () async {
