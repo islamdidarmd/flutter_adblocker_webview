@@ -3,7 +3,7 @@ import 'package:adblocker_webview/src/domain/use_case/fetch_banned_host_use_case
 import 'package:adblocker_webview/src/service_locator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../data/repository/fake_adblocker_repository_impl.dart';
+import '../fakes/fake_adblocker_repository_impl.dart';
 
 void main() {
   final getIt = configureDependencies();

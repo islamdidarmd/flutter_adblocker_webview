@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:adblocker_webview/adblocker_webview.dart';
 
-import 'data/repository/fake_adblocker_repository_impl.dart';
+import 'fakes/fake_adblocker_repository_impl.dart';
 
 void main() {
   final getIt = configureDependencies();
@@ -22,12 +22,12 @@ void main() {
       );
   });
   test('Test controller initializes successfully', () async {
-    final controller = await AdBlockerWebviewController()
+    final controller = await AdBlockerWebviewController.instance
       ..initialize();
   });
 
   test('Test is Ad detection is working', () async {
-    final controller = AdBlockerWebviewController();
+    final controller = AdBlockerWebviewController.instance;
     await controller.initialize();
     final isAd = controller.isAd(host: Host(domain: "google.com"));
     expect(isAd, true);
