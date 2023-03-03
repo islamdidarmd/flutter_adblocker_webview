@@ -57,9 +57,10 @@ class _MyHomePageState extends State<MyHomePage> {
       body: _showBrowser
           ? Column(
               children: [
-                LinearProgressIndicator(
-                  value: _progress.toDouble(),
-                ),
+                if (_progress > 0 && _progress < 100)
+                  LinearProgressIndicator(
+                    value: _progress.toDouble() / 100,
+                  ),
                 Expanded(
                   child: AdBlockerWebviewWidget(
                     url: _textEditingController.text,

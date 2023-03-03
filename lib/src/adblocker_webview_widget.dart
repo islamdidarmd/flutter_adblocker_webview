@@ -41,8 +41,13 @@ class _AdBlockerWebviewWidgetState extends State<AdBlockerWebviewWidget> {
       ..loadRequest(Uri.parse(widget.url));
   }
 
-  NavigationDelegate get _navigationDelegate =>
-      NavigationDelegate(onNavigationRequest: _onNavigationRequest);
+  NavigationDelegate get _navigationDelegate => NavigationDelegate(
+        onNavigationRequest: _onNavigationRequest,
+        onPageStarted: widget.navigationDelegate?.onPageStarted,
+        onPageFinished: widget.navigationDelegate?.onPageFinished,
+        onProgress: widget.navigationDelegate?.onProgress,
+        onWebResourceError: widget.navigationDelegate?.onWebResourceError,
+      );
 
   FutureOr<NavigationDecision> _onNavigationRequest(NavigationRequest request) {
     final uri = Uri.parse(request.url);
