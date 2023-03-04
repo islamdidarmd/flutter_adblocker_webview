@@ -22,7 +22,7 @@ void main() {
       );
   });
   test('Test controller initializes successfully', () async {
-    final controller = await AdBlockerWebviewController.instance
+    await AdBlockerWebviewController.instance
       ..initialize();
   });
 

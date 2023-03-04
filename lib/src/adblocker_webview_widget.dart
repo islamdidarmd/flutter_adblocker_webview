@@ -2,7 +2,6 @@ import 'dart:async';
 
 import '../adblocker_webview.dart';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import 'domain/entity/host.dart';
 
