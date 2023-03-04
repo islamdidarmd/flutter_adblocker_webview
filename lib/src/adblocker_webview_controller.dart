@@ -2,7 +2,21 @@ import 'domain/use_case/fetch_banned_host_use_case.dart';
 import 'package:adblocker_webview/src/service_locator.dart';
 
 import 'domain/entity/host.dart';
-
+/// The controller for [AdBlockerWebviewWidget].
+/// Below is and Example of getting a singleton instance:
+/// ```dart
+///    final _adBlockerWebviewController = AdBlockerWebviewController.instance;
+/// ```
+/// It's better to warm up the controller before displaying the webview. It's possible to do that by:
+/// ```dart
+///   @override
+///   void initState() {
+///     super.initState();
+///     _adBlockerWebviewController.initialize();
+///     /// ... Other code here.
+///   }
+/// ```
+///
 class AdBlockerWebviewController {
   static AdBlockerWebviewController? _instance;
   late final FetchBannedHostUseCase _fetchBannedHostUseCase; ///ignore: avoid-late-keyword
