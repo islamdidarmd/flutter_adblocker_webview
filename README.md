@@ -1,39 +1,59 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+- A webview implementation of in Flutter that blocks most of the ads that appear inside of the webpages
+- Current implementation is based on official `webview_flutter` packages. So, the features and limitation of that package
+  is included
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
+>On iOS the WebView widget is backed by a [WKWebView](https://developer.apple.com/documentation/webkit/wkwebview).
+On Android the WebView widget is backed by a [WebView](https://developer.android.com/reference/android/webkit/WebView).
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
-
-## Features
-
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+|             | Android        | iOS   |
+|-------------|----------------|-------|
+| **Support** | SDK 19+ or 20+ | 11.0+ |
 
 ## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Add `adblocker_webview_flutter` as a [dependency in your pubspec.yaml file](https://pub.dev/packages/adblocker_webview_flutter/install).
 
 ## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
+1. Acquire an instance of [AdBlockerWebviewController](https://pub.dev/documentation/adblocker_webview_flutter/latest/adblocker_webview_flutter/AdBlockerWebviewController-class.html])
 ```dart
-const like = 'sample';
+  final _adBlockerWebviewController = AdBlockerWebviewController.instance;
+```
+It's better to warm up the controller before displaying the webview. It's possible to do that by
+```dart
+  @override
+  void initState() {
+    super.initState();
+    _adBlockerWebviewController.initialize();
+    /// ... Other code here.
+  }
 ```
 
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+2. Add the [AdBlockerWebviewWidget](https://pub.dev/documentation/adblocker_webview_flutter/latest/adblocker_webview_flutter/AdBlockerWebviewWidget-class.html]) in widget tree
+```dart
+        AdBlockerWebviewWidget(
+            url: "Valid url Here",
+            adBlockerWebviewController: widget.controller,
+            onProgress: (progress) {
+              setState(() {
+                _progress = progress;
+              });
+            },
+            shouldBlockAds: true,
+            /// Other params if required
+          );
+```
+  Supported params of [AdBlockerWebviewWidget](https://pub.dev/documentation/adblocker_webview_flutter/latest/adblocker_webview_flutter/AdBlockerWebviewWidget-class.html]) are:
+  ```dart
+    super.key,
+    required this.url,
+    required this.adBlockerWebviewController,
+    required this.shouldBlockAds,
+    this.javaScriptMode = JavaScriptMode.unrestricted,
+    this.backgroundColor = const Color(0x00000000),
+    this.onPageStarted,
+    this.onNavigationRequest,
+    this.onPageFinished,
+    this.onProgress,
+    this.onWebResourceError,
+```
+### Contribution
+Contributions are welcome 😄. Please file an issue [here](https://github.com/islamdidarmd/adblocker_webview_flutter/issues) if you want to include additional feature or found a bug!
