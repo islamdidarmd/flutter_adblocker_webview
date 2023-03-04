@@ -1,4 +1,6 @@
 import 'package:adblocker_webview/adblocker_webview.dart';
+import 'package:example/browser.dart';
+import 'package:example/url_input.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -33,8 +35,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _adBlockerWebviewController = AdBlockerWebviewController.instance;
   bool _showBrowser = false;
-  int _progress = 0;
-  final _textEditingController = TextEditingController();
+  bool _shouldBlockAds = false;
+  String _url = "";
 
   @override
   void initState() {
@@ -43,56 +45,37 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  void dispose() {
-    _textEditingController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: _showBrowser
-          ? Column(
-              children: [
-                if (_progress > 0 && _progress < 100)
-                  LinearProgressIndicator(
-                    value: _progress.toDouble() / 100,
-                  ),
-                Expanded(
-                  child: AdBlockerWebviewWidget(
-                    url: _textEditingController.text,
-                    adBlockerWebviewController: _adBlockerWebviewController,
-                    navigationDelegate: NavigationDelegate(
-                      onProgress: (progress) {
-                        setState(() {
-                          _progress = progress;
-                        });
-                      },
-                    ),
-                    shouldBlockAds: true,
-                  ),
-                ),
-              ],
+      appBar: AppBar(title: Text(widget.title)),
+      floatingActionButton: _showBrowser
+          ? FloatingActionButton(
+              child: const Icon(Icons.edit),
+              onPressed: () {
+                setState(() {
+                  _showBrowser = false;
+                });
+              },
             )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextField(
-                  controller: _textEditingController,
-                  maxLines: 1,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _showBrowser = true;
-                    });
-                  },
-                  child: const Text("Go"),
-                )
-              ],
+          : null,
+      body: _showBrowser
+          ? Browser(
+              url: _url,
+              controller: _adBlockerWebviewController,
+              shouldBlockAds: _shouldBlockAds,
+            )
+          : UrlInput(
+              onSubmit: (url) {
+                setState(() {
+                  _url = url;
+                  _showBrowser = true;
+                });
+              },
+              onBlockAdsStatusChange: (shouldBlockAds) {
+                setState(() {
+                  _shouldBlockAds = shouldBlockAds;
+                });
+              },
             ),
     );
   }
