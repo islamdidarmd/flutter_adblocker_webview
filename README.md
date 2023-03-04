@@ -13,7 +13,7 @@ On Android the WebView widget is backed by a [WebView](https://developer.android
 Add `adblocker_webview_flutter` as a [dependency in your pubspec.yaml file](https://pub.dev/packages/adblocker_webview_flutter/install).
 
 ## Usage
-1. Acquire an instance of [AdBlockerWebviewController](https://pub.dev/documentation/adblocker_webview_flutter/latest/adblocker_webview_flutter/AdBlockerWebviewController-class.html])
+1. Acquire an instance of [AdBlockerWebviewController](https://pub.dev/documentation/adblocker_webview/latest/adblocker_webview/AdBlockerWebviewController-class.html)
 ```dart
   final _adBlockerWebviewController = AdBlockerWebviewController.instance;
 ```
@@ -27,7 +27,7 @@ It's better to warm up the controller before displaying the webview. It's possib
   }
 ```
 
-2. Add the [AdBlockerWebviewWidget](https://pub.dev/documentation/adblocker_webview_flutter/latest/adblocker_webview_flutter/AdBlockerWebviewWidget-class.html]) in widget tree
+2. Add the [AdBlockerWebviewWidget](https://pub.dev/documentation/adblocker_webview/latest/adblocker_webview/AdBlockerWebviewWidget-class.html) in widget tree
 ```dart
         AdBlockerWebviewWidget(
             url: "Valid url Here",
@@ -41,7 +41,7 @@ It's better to warm up the controller before displaying the webview. It's possib
             /// Other params if required
           );
 ```
-  Supported params of [AdBlockerWebviewWidget](https://pub.dev/documentation/adblocker_webview_flutter/latest/adblocker_webview_flutter/AdBlockerWebviewWidget-class.html]) are:
+  Supported params of [AdBlockerWebviewWidget](https://pub.dev/documentation/adblocker_webview/latest/adblocker_webview/AdBlockerWebviewWidget-class.html]) are:
   ```dart
     super.key,
     required this.url,
