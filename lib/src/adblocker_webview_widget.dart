@@ -1,8 +1,10 @@
 import 'dart:async';
 
-import '../adblocker_webview.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
 import 'package:flutter/material.dart';
 
+import 'adblocker_webview_controller.dart';
 import 'domain/entity/host.dart';
 
 class AdBlockerWebviewWidget extends StatefulWidget {
@@ -13,7 +15,11 @@ class AdBlockerWebviewWidget extends StatefulWidget {
     required this.shouldBlockAds,
     this.javaScriptMode = JavaScriptMode.unrestricted,
     this.backgroundColor = const Color(0x00000000),
-    this.navigationDelegate,
+    this.onPageStarted,
+    this.onNavigationRequest,
+    this.onPageFinished,
+    this.onProgress,
+    this.onWebResourceError,
   });
 
   final String url;
@@ -21,7 +27,12 @@ class AdBlockerWebviewWidget extends StatefulWidget {
   final bool shouldBlockAds;
   final JavaScriptMode javaScriptMode;
   final Color backgroundColor;
-  final NavigationDelegate? navigationDelegate;
+  final FutureOr<NavigationDecision> Function(NavigationRequest request)?
+      onNavigationRequest;
+  final void Function(String url)? onPageStarted;
+  final void Function(String url)? onPageFinished;
+  final void Function(int progress)? onProgress;
+  final void Function(WebResourceError error)? onWebResourceError;
 
   @override
   State<AdBlockerWebviewWidget> createState() => _AdBlockerWebviewWidgetState();
@@ -42,10 +53,10 @@ class _AdBlockerWebviewWidgetState extends State<AdBlockerWebviewWidget> {
 
   NavigationDelegate get _navigationDelegate => NavigationDelegate(
         onNavigationRequest: _onNavigationRequest,
-        onPageStarted: widget.navigationDelegate?.onPageStarted,
-        onPageFinished: widget.navigationDelegate?.onPageFinished,
-        onProgress: widget.navigationDelegate?.onProgress,
-        onWebResourceError: widget.navigationDelegate?.onWebResourceError,
+        onPageStarted: widget.onPageStarted,
+        onPageFinished: widget.onPageFinished,
+        onProgress: widget.onProgress,
+        onWebResourceError: widget.onWebResourceError,
       );
 
   FutureOr<NavigationDecision> _onNavigationRequest(NavigationRequest request) {
@@ -56,7 +67,7 @@ class _AdBlockerWebviewWidgetState extends State<AdBlockerWebviewWidget> {
       return NavigationDecision.prevent;
     }
 
-    return widget.navigationDelegate?.onNavigationRequest?.call(request) ??
+    return widget.onNavigationRequest?.call(request) ??
         NavigationDecision.navigate;
   }
 

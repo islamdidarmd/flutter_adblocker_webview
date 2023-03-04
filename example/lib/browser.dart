@@ -30,13 +30,11 @@ class _BrowserState extends State<Browser> {
           child: AdBlockerWebviewWidget(
             url: widget.url,
             adBlockerWebviewController: widget.controller,
-            navigationDelegate: NavigationDelegate(
-              onProgress: (progress) {
-                setState(() {
-                  _progress = progress;
-                });
-              },
-            ),
+            onProgress: (progress) {
+              setState(() {
+                _progress = progress;
+              });
+            },
             shouldBlockAds: widget.shouldBlockAds,
           ),
         ),
