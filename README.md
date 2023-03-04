@@ -56,4 +56,4 @@ It's better to warm up the controller before displaying the webview. It's possib
     this.onWebResourceError,
 ```
 ### Contribution
-Contributions are welcome 😄. Please file an issue if you want to include additional feature or found a bug!
+Contributions are welcome 😄. Please file an issue [Here](https://github.com/islamdidarmd/adblocker_webview_flutter/issues) if you want to include additional feature or found a bug!
