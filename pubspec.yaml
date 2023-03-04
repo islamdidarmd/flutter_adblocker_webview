@@ -1,5 +1,5 @@
 name: adblocker_webview
-description: A adblocker webview for flutter
+description: A webview for flutter with adblocking capability
 version: 0.0.1
 homepage: none
 publish_to: none
