@@ -11,6 +11,8 @@ dart_code_metrics:
     - test/**
   extends:
     - package:dart_code_metrics/presets/all.yaml
+  rules-exclude:
+    - avoid-ignoring-return-values
   anti-patterns:
     - long-method
     - long-parameter-list
