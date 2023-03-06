@@ -6,7 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../fakes/fake_adblocker_repository_impl.dart';
 
 void main() {
-  final getIt = configureDependencies();
+  ServiceLocator.configureDependencies();
+  final getIt = ServiceLocator.getIt;
 
   setUp(() async {
     await getIt.reset();
