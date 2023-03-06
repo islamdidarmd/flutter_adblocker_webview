@@ -14,15 +14,12 @@ dependencies:
 
   get_it: ^7.2.0
   http: ^0.13.5
-  injectable: ^2.1.0
   webview_flutter: ^4.0.6
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: any
   dart_code_metrics: ^5.6.0
-  injectable_generator: ^2.1.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

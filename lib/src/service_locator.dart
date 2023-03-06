@@ -1,6 +1,8 @@
-import 'package:injectable/injectable.dart';
 import 'package:get_it/get_it.dart';
-import 'service_locator.config.dart';
+
+import 'data/repository/adblocker_repository_impl.dart';
+import 'domain/repository/adblocker_repository.dart';
+import 'domain/use_case/fetch_banned_host_use_case.dart';
 
 /// Service locator for this package.
 /// Below is and example for getting an instance of a object registered wit [GetIt]:
@@ -11,11 +13,20 @@ import 'service_locator.config.dart';
 /// and running the build runner.
 
 ///ignore_for_file: prefer-static-class
+///ignore_for_file: avoid-late-keyword
 class ServiceLocator {
-  static final GetIt instance = GetIt.asNewInstance();
+  static late final GetIt _getIt;
 
-  static T get<T extends Object>() => instance.get<T>();
+  static GetIt get getIt => _getIt;
+
+  static void configureDependencies() {
+    _getIt = GetIt.asNewInstance();
+    _getIt
+      ..registerFactory<AdBlockerRepository>(() => AdBlockerRepositoryImpl())
+      ..registerFactory<FetchBannedHostUseCase>(
+        () => FetchBannedHostUseCase(adBlockerRepository: get()),
+      );
+  }
+
+  static T get<T extends Object>() => _getIt.get<T>();
 }
-
-@InjectableInit(initializerName: 'initGetIt', preferRelativeImports: true)
-GetIt configureDependencies() => ServiceLocator.instance.initGetIt();

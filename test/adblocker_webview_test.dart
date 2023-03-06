@@ -5,12 +5,12 @@ import 'package:adblocker_webview/src/service_locator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:adblocker_webview/adblocker_webview.dart';
+import 'package:get_it/get_it.dart';
 
 import 'fakes/fake_adblocker_repository_impl.dart';
 
 void main() {
-  final getIt = configureDependencies();
-  setUp(() async {
+  Future<void> registerFakes(GetIt getIt) async {
     await getIt.reset();
 
     getIt
@@ -20,24 +20,23 @@ void main() {
       ..registerFactory<FetchBannedHostUseCase>(
         () => FetchBannedHostUseCase(adBlockerRepository: getIt.get()),
       );
-  });
+  }
+
   test('Test controller initializes successfully', () async {
-    await AdBlockerWebviewController.instance
-      ..initialize();
+    final instance = AdBlockerWebviewController.instance;
+    await registerFakes(ServiceLocator.getIt);
+    await instance.initialize();
   });
 
   test('Test is Ad detection is working', () async {
     final controller = AdBlockerWebviewController.instance;
+    await registerFakes(ServiceLocator.getIt);
     await controller.initialize();
-    final isAd = controller.isAd(host: Host(domain: "google.com"));
+    final isAd = controller.isAd(host: Host(domain: "xyz.com"));
     expect(isAd, true);
 
     final isAnotherAd =
-        controller.isAd(host: Host(domain: "https://google.com"));
+        controller.isAd(host: Host(domain: "not-ads.com"));
     expect(isAnotherAd, false);
-  });
-
-  tearDown(() {
-    getIt.reset();
   });
 }
