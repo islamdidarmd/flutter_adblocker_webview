@@ -25,12 +25,13 @@ import 'domain/entity/host.dart';
 class AdBlockerWebviewController {
   static AdBlockerWebviewController? _instance;
 
-  late final FetchBannedHostUseCase _fetchBannedHostUseCase;
+  FetchBannedHostUseCase? _fetchBannedHostUseCase;
 
   final _bannedHost = <Host>[];
 
   static AdBlockerWebviewController get instance {
     if (_instance == null) {
+      ServiceLocator.configureDependencies();
       _instance = AdBlockerWebviewController._internal();
     }
 
@@ -40,10 +41,8 @@ class AdBlockerWebviewController {
   AdBlockerWebviewController._internal();
 
   Future<void> initialize() async {
-    configureDependencies();
     _fetchBannedHostUseCase = ServiceLocator.get<FetchBannedHostUseCase>();
-
-    final hosts = await _fetchBannedHostUseCase.execute();
+    final hosts = await _fetchBannedHostUseCase?.execute() ?? [];
     _bannedHost
       ..clear()
       ..addAll(hosts);
