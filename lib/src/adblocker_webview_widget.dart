@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:flutter/material.dart';
 
@@ -9,23 +9,21 @@ import 'domain/entity/host.dart';
 
 /// A webview implementation of in Flutter that blocks most of the ads that appear inside of the webpages.
 class AdBlockerWebviewWidget extends StatefulWidget {
-
   const AdBlockerWebviewWidget({
     super.key,
     required this.url,
     required this.adBlockerWebviewController,
     required this.shouldBlockAds,
-    this.javaScriptMode = JavaScriptMode.unrestricted,
-    this.backgroundColor = const Color(0x00000000),
-    this.onPageStarted,
-    this.onNavigationRequest,
-    this.onPageFinished,
+    this.onLoadStart,
+    this.onLoadFinished,
     this.onProgress,
-    this.onWebResourceError,
+    this.onLoadError,
+    this.onTitleChanged,
+    this.options,
   });
 
   /// Required: The initial [String] url that will be displayed in webview.
-  final String url;
+  final Uri url;
 
   /// Required: The controller for [AdBlockerWebviewWidget]. See more at [AdBlockerWebviewController].
   final AdBlockerWebviewController adBlockerWebviewController;
@@ -33,72 +31,95 @@ class AdBlockerWebviewWidget extends StatefulWidget {
   /// Required: Specifies whether to block or allow ads.
   final bool shouldBlockAds;
 
-  /// Optional: Describes the state of JavaScript support in a given web view.
-  /// See [JavaScriptMode].
-  final JavaScriptMode javaScriptMode;
-
-  /// Optional: backgroundColor of the webview.
-  final Color backgroundColor;
-
-  /// Invoked when a decision for a navigation request is pending.
-  ///
-  /// When a navigation is initiated by the WebView (e.g when a user clicks a
-  /// link) this delegate is called and has to decide how to proceed with the
-  /// navigation.
-  final FutureOr<NavigationDecision> Function(NavigationRequest request)?
-      onNavigationRequest;
-
   /// Invoked when a page has started loading.
-  final void Function(String url)? onPageStarted;
+  final void Function(InAppWebViewController controller, Uri? uri)? onLoadStart;
 
   /// Invoked when a page has finished loading.
-  final void Function(String url)? onPageFinished;
+  final void Function(InAppWebViewController controller, Uri? uri)?
+      onLoadFinished;
 
   /// Invoked when a page is loading to report the progress.
   final void Function(int progress)? onProgress;
 
-  /// Invoked when a resource loading error occurred.
-  final void Function(WebResourceError error)? onWebResourceError;
+  /// Invoked when the page title is changed.
+  final void Function(InAppWebViewController controller, String? title)?
+      onTitleChanged;
+
+  /// Invoked when a loading error occurred.
+  final void Function(
+    InAppWebViewController controller,
+    Uri? url,
+    int code,
+    String message,
+  )? onLoadError;
+
+  /// Options for InAppWebView.
+  final InAppWebViewGroupOptions? options;
 
   @override
   State<AdBlockerWebviewWidget> createState() => _AdBlockerWebviewWidgetState();
 }
 
 class _AdBlockerWebviewWidgetState extends State<AdBlockerWebviewWidget> {
-  final _webviewController = WebViewController();
+  final _webViewKey = GlobalKey();
+  InAppWebViewGroupOptions? _inAppWebViewOptions;
 
   @override
   void initState() {
     super.initState();
-    _webviewController
-      ..setJavaScriptMode(widget.javaScriptMode)
-      ..setBackgroundColor(widget.backgroundColor)
-      ..setNavigationDelegate(_navigationDelegate)
-      ..loadRequest(Uri.parse(widget.url));
+    _inAppWebViewOptions = widget.options ??
+        InAppWebViewGroupOptions(
+          crossPlatform: InAppWebViewOptions(
+            javaScriptEnabled: true,
+          ),
+        );
+
+    if (widget.shouldBlockAds) {
+      _setContentBlockers();
+    }
   }
 
-  NavigationDelegate get _navigationDelegate => NavigationDelegate(
-        onNavigationRequest: _onNavigationRequest,
-        onPageStarted: widget.onPageStarted,
-        onPageFinished: widget.onPageFinished,
-        onProgress: widget.onProgress,
-        onWebResourceError: widget.onWebResourceError,
-      );
+  void _setContentBlockers() {
+    final contentBlockerList = <ContentBlocker>[];
+    contentBlockerList.addAll(
+      widget.adBlockerWebviewController.bannedHost.map((e) => ContentBlocker(
+            trigger: ContentBlockerTrigger(
+              urlFilter: _createUrlFilterFromAuthority(e.authority),
+            ),
+            action: ContentBlockerAction(
+              type: ContentBlockerActionType.BLOCK,
+            ),
+          )),
+    );
 
-  FutureOr<NavigationDecision> _onNavigationRequest(NavigationRequest request) {
-    final uri = Uri.parse(request.url);
+    _inAppWebViewOptions?.crossPlatform.contentBlockers = contentBlockerList;
+  }
 
-    if (widget.shouldBlockAds &&
-        widget.adBlockerWebviewController.isAd(host: Host(domain: uri.host))) {
-      return NavigationDecision.prevent;
+  String _createUrlFilterFromAuthority(String authority) => '.*.$authority/.*';
+
+  void _clearContentBlockers() =>
+      _inAppWebViewOptions?.crossPlatform.contentBlockers = [];
+
+  @override
+  void didUpdateWidget(AdBlockerWebviewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.shouldBlockAds) {
+      _setContentBlockers();
+    } else {
+      _clearContentBlockers();
     }
-
-    return widget.onNavigationRequest?.call(request) ??
-        NavigationDecision.navigate;
   }
 
   @override
   Widget build(BuildContext context) {
-    return WebViewWidget(controller: _webviewController);
+    return InAppWebView(
+      key: _webViewKey,
+      initialUrlRequest: URLRequest(url: widget.url),
+      initialOptions: _inAppWebViewOptions,
+      onLoadStart: widget.onLoadStart,
+      onLoadStop: widget.onLoadFinished,
+      onLoadError: widget.onLoadError,
+      onTitleChanged: widget.onTitleChanged,
+    );
   }
 }

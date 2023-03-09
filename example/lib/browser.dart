@@ -28,7 +28,7 @@ class _BrowserState extends State<Browser> {
           LinearProgressIndicator(value: _progress / 100.0),
         Expanded(
           child: AdBlockerWebviewWidget(
-            url: widget.url,
+            url: Uri.parse(widget.url),
             adBlockerWebviewController: widget.controller,
             onProgress: (progress) {
               setState(() {

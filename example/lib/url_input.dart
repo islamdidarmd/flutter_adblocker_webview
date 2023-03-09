@@ -6,10 +6,12 @@ class UrlInput extends StatefulWidget {
     super.key,
     required this.onSubmit,
     required this.onBlockAdsStatusChange,
+    required this.shouldBlockAds,
   });
 
   final Function(String url) onSubmit;
   final Function(bool shouldBlockAds) onBlockAdsStatusChange;
+  final bool shouldBlockAds;
 
   @override
   State<UrlInput> createState() => _UrlInputState();
@@ -18,6 +20,12 @@ class UrlInput extends StatefulWidget {
 class _UrlInputState extends State<UrlInput> {
   final _textEditingController = TextEditingController();
   bool _shouldBlockAds = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _shouldBlockAds = widget.shouldBlockAds;
+  }
 
   @override
   void dispose() {

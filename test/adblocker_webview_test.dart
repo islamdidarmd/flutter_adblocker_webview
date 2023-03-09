@@ -32,11 +32,11 @@ void main() {
     final controller = AdBlockerWebviewController.instance;
     await registerFakes(ServiceLocator.getIt);
     await controller.initialize();
-    final isAd = controller.isAd(host: Host(domain: "xyz.com"));
+    final isAd = controller.isAd(host: Host(authority: "xyz.com"));
     expect(isAd, true);
 
     final isAnotherAd =
-        controller.isAd(host: Host(domain: "not-ads.com"));
+        controller.isAd(host: Host(authority: "not-ads.com"));
     expect(isAnotherAd, false);
   });
 }

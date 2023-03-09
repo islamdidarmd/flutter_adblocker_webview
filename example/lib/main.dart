@@ -76,6 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   _shouldBlockAds = shouldBlockAds;
                 });
               },
+              shouldBlockAds: _shouldBlockAds,
             ),
     );
   }
