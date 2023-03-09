@@ -15,7 +15,7 @@ class AdBlockerRepositoryImpl implements AdBlockerRepository {
       final response = await http.get(Uri.parse(url));
 
       return LineSplitter.split(response.body)
-          .map((e) => Host(domain: e))
+          .map((e) => Host(authority: e))
           .toList();
     } catch (e) {
       if (kDebugMode) {

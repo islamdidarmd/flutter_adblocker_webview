@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'domain/use_case/fetch_banned_host_use_case.dart';
 import 'package:adblocker_webview/src/service_locator.dart';
 
@@ -29,6 +31,9 @@ class AdBlockerWebviewController {
 
   final _bannedHost = <Host>[];
 
+  UnmodifiableListView<Host> get bannedHost =>
+      UnmodifiableListView(_bannedHost);
+
   static AdBlockerWebviewController get instance {
     if (_instance == null) {
       ServiceLocator.configureDependencies();
@@ -51,7 +56,7 @@ class AdBlockerWebviewController {
   bool isAd({required Host host}) {
     return _bannedHost.any(
       (element) {
-        return host.domain.contains(element.domain);
+        return host.authority.contains(element.authority);
       },
     );
   }

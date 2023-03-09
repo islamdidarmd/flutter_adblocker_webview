@@ -1,7 +1,7 @@
 class Host {
-  final String domain;
+  final String authority;
 
   const Host({
-    required this.domain,
+    required this.authority,
   });
 }
