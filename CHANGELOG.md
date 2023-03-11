@@ -1,3 +1,6 @@
+## 0.1.3
+* Replaced `webview_flutter` package with `flutter_InAppWebview`
+
 ## 0.1.2
 * Fixed Unit tests
 * Removed dependency from injectable library
