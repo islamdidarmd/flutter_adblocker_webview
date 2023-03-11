@@ -1,5 +1,5 @@
 - A webview implementation of in Flutter that blocks most of the ads that appear inside of the webpages
-- Current implementation is based on official `webview_flutter` packages. So, the features and limitation of that package
+- Current implementation is based on official `flutter_inappwebview` packages. So, the features and limitation of that package
   is included
 
 >On iOS the WebView widget is backed by a [WKWebView](https://developer.apple.com/documentation/webkit/wkwebview).
@@ -43,17 +43,18 @@ It's better to warm up the controller before displaying the webview. It's possib
 ```
   Supported params of [AdBlockerWebviewWidget](https://pub.dev/documentation/adblocker_webview/latest/adblocker_webview/AdBlockerWebviewWidget-class.html]) are:
   ```dart
-    super.key,
-    required this.url,
-    required this.adBlockerWebviewController,
-    required this.shouldBlockAds,
-    this.javaScriptMode = JavaScriptMode.unrestricted,
-    this.backgroundColor = const Color(0x00000000),
-    this.onPageStarted,
-    this.onNavigationRequest,
-    this.onPageFinished,
-    this.onProgress,
-    this.onWebResourceError,
+  const AdBlockerWebviewWidget({
+      super.key,
+      required this.url,
+      required this.adBlockerWebviewController,
+      required this.shouldBlockAds,
+      this.onLoadStart,
+      this.onLoadFinished,
+      this.onProgress,
+      this.onLoadError,
+      this.onTitleChanged,
+      this.options,
+  });
 ```
 ### Contribution
 Contributions are welcome 😄. Please file an issue [here](https://github.com/islamdidarmd/adblocker_webview_flutter/issues) if you want to include additional feature or found a bug!
