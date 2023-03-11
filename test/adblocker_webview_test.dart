@@ -1,4 +1,3 @@
-import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dart';
 import 'package:adblocker_webview/src/domain/use_case/fetch_banned_host_use_case.dart';
 import 'package:adblocker_webview/src/service_locator.dart';
@@ -26,17 +25,5 @@ void main() {
     final instance = AdBlockerWebviewController.instance;
     await registerFakes(ServiceLocator.getIt);
     await instance.initialize();
-  });
-
-  test('Test is Ad detection is working', () async {
-    final controller = AdBlockerWebviewController.instance;
-    await registerFakes(ServiceLocator.getIt);
-    await controller.initialize();
-    final isAd = controller.isAd(host: Host(authority: "xyz.com"));
-    expect(isAd, true);
-
-    final isAnotherAd =
-        controller.isAd(host: Host(authority: "not-ads.com"));
-    expect(isAnotherAd, false);
   });
 }

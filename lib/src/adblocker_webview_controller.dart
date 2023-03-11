@@ -52,12 +52,4 @@ class AdBlockerWebviewController {
       ..clear()
       ..addAll(hosts);
   }
-
-  bool isAd({required Host host}) {
-    return _bannedHost.any(
-      (element) {
-        return host.authority.contains(element.authority);
-      },
-    );
-  }
 }

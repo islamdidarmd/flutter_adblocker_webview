@@ -1,11 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:flutter/material.dart';
 
 import 'adblocker_webview_controller.dart';
-import 'domain/entity/host.dart';
 
 /// A webview implementation of in Flutter that blocks most of the ads that appear inside of the webpages.
 class AdBlockerWebviewWidget extends StatefulWidget {
