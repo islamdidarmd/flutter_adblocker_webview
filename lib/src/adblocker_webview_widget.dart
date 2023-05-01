@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'adblocker_webview_controller.dart';
 
 /// A webview implementation of in Flutter that blocks most of the ads that appear inside of the webpages.
-class AdBlockerWebviewWidget extends StatefulWidget {
-  const AdBlockerWebviewWidget({
+class AdBlockerWebview extends StatefulWidget {
+  const AdBlockerWebview({
     super.key,
     required this.url,
     required this.adBlockerWebviewController,
@@ -22,7 +22,7 @@ class AdBlockerWebviewWidget extends StatefulWidget {
   /// Required: The initial [String] url that will be displayed in webview.
   final Uri url;
 
-  /// Required: The controller for [AdBlockerWebviewWidget]. See more at [AdBlockerWebviewController].
+  /// Required: The controller for [AdBlockerWebview]. See more at [AdBlockerWebviewController].
   final AdBlockerWebviewController adBlockerWebviewController;
 
   /// Required: Specifies whether to block or allow ads.
@@ -54,10 +54,10 @@ class AdBlockerWebviewWidget extends StatefulWidget {
   final InAppWebViewGroupOptions? options;
 
   @override
-  State<AdBlockerWebviewWidget> createState() => _AdBlockerWebviewWidgetState();
+  State<AdBlockerWebview> createState() => _AdBlockerWebviewState();
 }
 
-class _AdBlockerWebviewWidgetState extends State<AdBlockerWebviewWidget> {
+class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   final _webViewKey = GlobalKey();
   InAppWebViewGroupOptions? _inAppWebViewOptions;
 
@@ -98,7 +98,7 @@ class _AdBlockerWebviewWidgetState extends State<AdBlockerWebviewWidget> {
       _inAppWebViewOptions?.crossPlatform.contentBlockers = [];
 
   @override
-  void didUpdateWidget(AdBlockerWebviewWidget oldWidget) {
+  void didUpdateWidget(AdBlockerWebview oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.shouldBlockAds) {
       _setContentBlockers();
