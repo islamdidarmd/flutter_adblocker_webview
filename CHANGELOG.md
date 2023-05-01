@@ -1,3 +1,9 @@
+## 1.0.0
+** Breaking Changes**
+* Removed Widget suffix from `AdBlockerWebview`
+
+** Other **
+* Fix broken links in readme
 ## 0.1.4
 * Updated Readme
 ## 0.1.3

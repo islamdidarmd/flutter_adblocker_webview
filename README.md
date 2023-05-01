@@ -10,7 +10,7 @@ On Android the WebView widget is backed by a [WebView](https://developer.android
 | **Support** | SDK 19+ or 20+ | 11.0+ |
 
 ## Getting started
-Add `adblocker_webview_flutter` as a [dependency in your pubspec.yaml file](https://pub.dev/packages/adblocker_webview_flutter/install).
+Add `adblocker_webview` as a [dependency](https://pub.dev/packages/adblocker_webview/install) in your pubspec.yaml file.
 
 ## Usage
 1. Acquire an instance of [AdBlockerWebviewController](https://pub.dev/documentation/adblocker_webview/latest/adblocker_webview/AdBlockerWebviewController-class.html)
@@ -27,9 +27,9 @@ It's better to warm up the controller before displaying the webview. It's possib
   }
 ```
 
-2. Add the [AdBlockerWebviewWidget](https://pub.dev/documentation/adblocker_webview/latest/adblocker_webview/AdBlockerWebviewWidget-class.html) in widget tree
+2. Add the [AdBlockerWebview](https://pub.dev/documentation/adblocker_webview/latest/adblocker_webview/AdBlockerWebview-class.html) in widget tree
 ```dart
-        AdBlockerWebviewWidget(
+        AdBlockerWebview(
             url: "Valid url Here",
             adBlockerWebviewController: widget.controller,
             onProgress: (progress) {
@@ -41,9 +41,9 @@ It's better to warm up the controller before displaying the webview. It's possib
             /// Other params if required
           );
 ```
-  Supported params of [AdBlockerWebviewWidget](https://pub.dev/documentation/adblocker_webview/latest/adblocker_webview/AdBlockerWebviewWidget-class.html]) are:
+  Supported params of [AdBlockerWebview](https://pub.dev/documentation/adblocker_webview/latest/adblocker_webview/AdBlockerWebview-class.html]) are:
   ```dart
-  const AdBlockerWebviewWidget({
+  const AdBlockerWebview({
       super.key,
       required this.url,
       required this.adBlockerWebviewController,
@@ -57,4 +57,4 @@ It's better to warm up the controller before displaying the webview. It's possib
   });
 ```
 ### Contribution
-Contributions are welcome 😄. Please file an issue [here](https://github.com/islamdidarmd/adblocker_webview_flutter/issues) if you want to include additional feature or found a bug!
+Contributions are welcome 😄. Please file an issue [here](https://github.com/islamdidarmd/flutter_adblocker_webview/issues) if you want to include additional feature or found a bug!
