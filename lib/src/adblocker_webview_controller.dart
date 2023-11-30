@@ -1,10 +1,10 @@
 import 'dart:collection';
 
-import 'package:adblocker_webview/src/data/repository/adblocker_repository_impl.dart';
+import 'package:adblocker_webview/adblocker_webview.dart';
+import 'package:adblocker_webview/src/adblocker_webview_controller_impl.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
-import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dart';
 
-/// The controller for [AdBlockerWebviewWidget].
+/// The controller for [AdBlockerWebview].
 /// Below is and Example of getting a singleton instance:
 /// ```dart
 ///    final _adBlockerWebviewController = AdBlockerWebviewController.instance;
@@ -23,29 +23,19 @@ import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dar
 
 ///ignore_for_file: avoid-late-keyword
 ///ignore_for_file: avoid-non-null-assertion
-class AdBlockerWebviewController {
+abstract class AdBlockerWebviewController {
   static AdBlockerWebviewController? _instance;
 
-  late final AdBlockerRepository _repository;
-
-  final _bannedHost = <Host>[];
-
-  UnmodifiableListView<Host> get bannedHost =>
-      UnmodifiableListView(_bannedHost);
-
+  /// Returns an implementation of this class
   static AdBlockerWebviewController get instance {
-    _instance ??= AdBlockerWebviewController._internal();
-
+    _instance ??= AdBlockerWebviewControllerImpl();
     return _instance!;
   }
 
-  AdBlockerWebviewController._internal();
+  /// Returns the banned host list.
+  /// This list items are populated after calling the [initialize] method
+  UnmodifiableListView<Host> get bannedHost;
 
-  Future<void> initialize() async {
-    _repository = AdBlockerRepositoryImpl();
-    final hosts = await _repository.fetchBannedHostList();
-    _bannedHost
-      ..clear()
-      ..addAll(hosts);
-  }
+  /// Initializes the controller
+  Future<void> initialize();
 }

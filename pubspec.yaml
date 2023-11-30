@@ -13,10 +13,10 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_inappwebview: ^5.8.0
   http: ^0.13.5
-  flutter_inappwebview: ^5.7.2+3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  very_good_analysis: ^5.0.0+1
+  very_good_analysis: ^4.0.0+1
