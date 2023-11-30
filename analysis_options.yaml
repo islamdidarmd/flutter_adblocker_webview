@@ -1,18 +1,14 @@
-analyzer:
-  plugins:
-    - dart_code_metrics
+include: package:very_good_analysis/analysis_options.5.0.0.yaml
 
-dart_code_metrics:
-  metrics:
-    cyclomatic-complexity: 20
-    number-of-parameters: 4
-    maximum-nesting-level: 5
-  metrics-exclude:
-    - test/**
-  extends:
-    - package:dart_code_metrics/presets/all.yaml
-  rules-exclude:
-    - avoid-ignoring-return-values
-  anti-patterns:
-    - long-method
-    - long-parameter-list
+analyzer:
+  exclude:
+    - lib/generated_plugin_registrant.dart
+    - lib/gen/**
+    - lib/**.g.dart
+    - lib/**.freezed.dart
+    - lib/**.config.dart
+
+linter:
+  rules:
+    public_member_api_docs: false
+    avoid_unused_constructor_parameters: false
