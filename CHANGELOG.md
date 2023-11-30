@@ -1,3 +1,8 @@
+## 1.0.1
+* Added support for webview backward and forward navigation
+* Reduced third party package dependency
+* Updated inAppWebview version to `^5.8.0`
+
 ## 1.0.0
 ** Breaking Changes**
 * Removed Widget suffix from `AdBlockerWebview`
