@@ -38,6 +38,27 @@ class _BrowserState extends State<Browser> {
             shouldBlockAds: widget.shouldBlockAds,
           ),
         ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            IconButton(
+              onPressed: () async {
+                if (await widget.controller.canGoBack()) {
+                  widget.controller.goBack();
+                }
+              },
+              icon: const Icon(Icons.arrow_back),
+            ),
+            IconButton(
+              onPressed: () async {
+                if (await widget.controller.canGoForward()) {
+                  widget.controller.goForward();
+                }
+              },
+              icon: const Icon(Icons.arrow_forward),
+            ),
+          ],
+        ),
       ],
     );
   }

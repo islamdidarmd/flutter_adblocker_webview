@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:adblocker_webview/adblocker_webview.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller_impl.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 /// The controller for [AdBlockerWebview].
 /// Below is and Example of getting a singleton instance:
@@ -38,4 +39,20 @@ abstract class AdBlockerWebviewController {
 
   /// Initializes the controller
   Future<void> initialize();
+
+  /// Sets inAppWebviewController to be used in future
+  /// Typically not to be used by third parties
+  void setInternalController(InAppWebViewController controller);
+
+  /// Returns decision of if the webview can go back
+  Future<bool> canGoBack();
+
+  /// Navigates webview to previous page
+  Future<void> goBack();
+
+  /// Returns decision of if he webview can go forward
+  Future<bool> canGoForward();
+
+  /// Navigates the webview to forward page
+  Future<void> goForward();
 }
