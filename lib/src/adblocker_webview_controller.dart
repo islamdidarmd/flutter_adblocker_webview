@@ -1,9 +1,8 @@
 import 'dart:collection';
 
-import 'domain/use_case/fetch_banned_host_use_case.dart';
-import 'package:adblocker_webview/src/service_locator.dart';
-
-import 'domain/entity/host.dart';
+import 'package:adblocker_webview/src/data/repository/adblocker_repository_impl.dart';
+import 'package:adblocker_webview/src/domain/entity/host.dart';
+import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dart';
 
 /// The controller for [AdBlockerWebviewWidget].
 /// Below is and Example of getting a singleton instance:
@@ -27,7 +26,7 @@ import 'domain/entity/host.dart';
 class AdBlockerWebviewController {
   static AdBlockerWebviewController? _instance;
 
-  FetchBannedHostUseCase? _fetchBannedHostUseCase;
+  late final AdBlockerRepository _repository;
 
   final _bannedHost = <Host>[];
 
@@ -35,10 +34,7 @@ class AdBlockerWebviewController {
       UnmodifiableListView(_bannedHost);
 
   static AdBlockerWebviewController get instance {
-    if (_instance == null) {
-      ServiceLocator.configureDependencies();
-      _instance = AdBlockerWebviewController._internal();
-    }
+    _instance ??= AdBlockerWebviewController._internal();
 
     return _instance!;
   }
@@ -46,8 +42,8 @@ class AdBlockerWebviewController {
   AdBlockerWebviewController._internal();
 
   Future<void> initialize() async {
-    _fetchBannedHostUseCase = ServiceLocator.get<FetchBannedHostUseCase>();
-    final hosts = await _fetchBannedHostUseCase?.execute() ?? [];
+    _repository = AdBlockerRepositoryImpl();
+    final hosts = await _repository.fetchBannedHostList();
     _bannedHost
       ..clear()
       ..addAll(hosts);
