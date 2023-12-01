@@ -10,7 +10,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 /// ```dart
 ///    final _adBlockerWebviewController = AdBlockerWebviewController.instance;
 /// ```
-/// It's better to warm up the controller before displaying the webview. It's possible to do that by:
+/// It's better to warm up the controller before displaying the webview.
+/// It's possible to do that by:
 /// ```dart
 ///   @override
 ///   void initState() {

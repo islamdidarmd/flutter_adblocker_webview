@@ -4,18 +4,18 @@ import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/data/repository/adblocker_repository_impl.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dart';
-import 'package:flutter_inappwebview/src/in_app_webview/in_app_webview_controller.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 ///Implementation for [AdBlockerWebviewController]
 class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
+
+  AdBlockerWebviewControllerImpl({AdBlockerRepository? repository})
+      : _repository = repository ?? AdBlockerRepositoryImpl();
   final AdBlockerRepository _repository;
 
   InAppWebViewController? _inAppWebViewController;
 
   final _bannedHost = <Host>[];
-
-  AdBlockerWebviewControllerImpl({AdBlockerRepository? repository})
-      : _repository = repository ?? AdBlockerRepositoryImpl();
 
   @override
   UnmodifiableListView<Host> get bannedHost =>
@@ -31,7 +31,7 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
 
   @override
   void setInternalController(InAppWebViewController controller) {
-    this._inAppWebViewController = controller;
+    _inAppWebViewController = controller;
   }
 
   @override
