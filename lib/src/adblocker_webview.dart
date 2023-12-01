@@ -1,16 +1,15 @@
+import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-import 'package:flutter/material.dart';
-
-import 'adblocker_webview_controller.dart';
-
-/// A webview implementation of in Flutter that blocks most of the ads that appear inside of the webpages.
+/// A webview implementation of in Flutter that blocks most of the ads that
+/// appear inside of the webpages.
 class AdBlockerWebview extends StatefulWidget {
   const AdBlockerWebview({
-    super.key,
     required this.url,
     required this.adBlockerWebviewController,
     required this.shouldBlockAds,
+    super.key,
     this.onLoadStart,
     this.onLoadFinished,
     this.onProgress,
@@ -22,7 +21,8 @@ class AdBlockerWebview extends StatefulWidget {
   /// Required: The initial [String] url that will be displayed in webview.
   final Uri url;
 
-  /// Required: The controller for [AdBlockerWebview]. See more at [AdBlockerWebviewController].
+  /// Required: The controller for [AdBlockerWebview].
+  /// See more at [AdBlockerWebviewController].
   final AdBlockerWebviewController adBlockerWebviewController;
 
   /// Required: Specifies whether to block or allow ads.
@@ -66,9 +66,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     super.initState();
     _inAppWebViewOptions = widget.options ??
         InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(
-            javaScriptEnabled: true,
-          ),
+          crossPlatform: InAppWebViewOptions(),
         );
 
     if (widget.shouldBlockAds) {
@@ -77,17 +75,18 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   }
 
   void _setContentBlockers() {
-    final contentBlockerList = <ContentBlocker>[];
-    contentBlockerList.addAll(
-      widget.adBlockerWebviewController.bannedHost.map((e) => ContentBlocker(
+    final contentBlockerList = widget.adBlockerWebviewController.bannedHost
+        .map(
+          (e) => ContentBlocker(
             trigger: ContentBlockerTrigger(
               urlFilter: _createUrlFilterFromAuthority(e.authority),
             ),
             action: ContentBlockerAction(
               type: ContentBlockerActionType.BLOCK,
             ),
-          )),
-    );
+          ),
+        )
+        .toList();
 
     _inAppWebViewOptions?.crossPlatform.contentBlockers = contentBlockerList;
   }

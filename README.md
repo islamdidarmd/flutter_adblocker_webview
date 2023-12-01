@@ -1,3 +1,5 @@
+[![style: very good analysis](https://img.shields.io/badge/style-very_good_analysis-B22C89.svg)](https://pub.dev/packages/very_good_analysis)
+
 - A webview implementation of in Flutter that blocks most of the ads that appear inside of the webpages
 - Current implementation is based on official `flutter_inappwebview` packages. So, the features and limitation of that package
   is included
