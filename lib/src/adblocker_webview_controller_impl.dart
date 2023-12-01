@@ -69,4 +69,13 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
 
     return _inAppWebViewController!.goForward();
   }
+
+  @override
+  Future<void> reload() async {
+    if (_inAppWebViewController == null) {
+      return;
+    }
+
+    return _inAppWebViewController!.reload();
+  }
 }
