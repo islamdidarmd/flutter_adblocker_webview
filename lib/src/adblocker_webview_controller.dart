@@ -55,4 +55,7 @@ abstract class AdBlockerWebviewController {
 
   /// Navigates the webview to forward page
   Future<void> goForward();
+
+  /// Reloads the current page
+  Future<void> reload();
 }

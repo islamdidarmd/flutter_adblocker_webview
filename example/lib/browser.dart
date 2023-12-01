@@ -51,6 +51,12 @@ class _BrowserState extends State<Browser> {
             ),
             IconButton(
               onPressed: () async {
+                widget.controller.reload();
+              },
+              icon: const Icon(Icons.refresh),
+            ),
+            IconButton(
+              onPressed: () async {
                 if (await widget.controller.canGoForward()) {
                   widget.controller.goForward();
                 }
