@@ -7,7 +7,8 @@ import 'fakes/fake_adblocker_repository_impl.dart';
 void main() {
   test('Test controller initializes successfully', () async {
     final AdBlockerWebviewController instance = AdBlockerWebviewControllerImpl(
-        repository: FakeAdBlockerRepositoryImpl(),);
+      repository: FakeAdBlockerRepositoryImpl(),
+    );
     await instance.initialize();
   });
 }
