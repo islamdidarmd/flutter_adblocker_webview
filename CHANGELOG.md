@@ -1,3 +1,7 @@
+## 1.0.2
+* Added support for page reload
+* Fixed some analysis issues
+
 ## 1.0.1
 * Added support for webview backward and forward navigation
 * Reduced third party package dependency
@@ -8,7 +12,7 @@
 * Removed Widget suffix from `AdBlockerWebview`
 
 ** Other **
-* Fix broken links in readme
+* Fixed broken links in readme
 ## 0.1.4
 * Updated Readme
 ## 0.1.3
