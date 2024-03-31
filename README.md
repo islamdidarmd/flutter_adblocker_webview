@@ -60,3 +60,11 @@ It's better to warm up the controller before displaying the webview. It's possib
 ```
 ### Contribution
 Contributions are welcome 😄. Please file an issue [here](https://github.com/islamdidarmd/flutter_adblocker_webview/issues) if you want to include additional feature or found a bug!
+#### Guide
+1. Create an issue first to make sure your request is not a duplicate one
+2. Create a fork of the repository (If it's your first contribution)
+3. Make a branch from `develop`
+4. Branch name should indicate the contribution type
+  - `feature/**` for new feature
+  - `bugfix/**` for a bug fix
+5. Raise a PR against the `develop` branch
