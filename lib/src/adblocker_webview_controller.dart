@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:adblocker_webview/adblocker_webview.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller_impl.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
+import 'package:adblocker_webview/src/internal_adblocker_webview_controller.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 /// The controller for [AdBlockerWebview].
@@ -25,7 +26,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 ///ignore_for_file: avoid-late-keyword
 ///ignore_for_file: avoid-non-null-assertion
-abstract class AdBlockerWebviewController {
+abstract class AdBlockerWebviewController implements InternalWebviewController{
   static AdBlockerWebviewController? _instance;
 
   /// Returns an implementation of this class
@@ -41,10 +42,6 @@ abstract class AdBlockerWebviewController {
   /// Initializes the controller
   Future<void> initialize();
 
-  /// Sets inAppWebviewController to be used in future
-  /// Typically not to be used by third parties
-  void setInternalController(InAppWebViewController controller);
-
   /// Returns decision of if the webview can go back
   Future<bool> canGoBack();
 
@@ -59,4 +56,6 @@ abstract class AdBlockerWebviewController {
 
   /// Reloads the current page
   Future<void> reload();
+
+  Future<void> clearCache();
 }

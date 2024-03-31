@@ -78,4 +78,13 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
 
     return _inAppWebViewController!.reload();
   }
+
+  @override
+  Future<void> clearCache() async {
+    if (_inAppWebViewController == null) {
+      return;
+    }
+
+    return _inAppWebViewController!.clearCache();
+  }
 }
