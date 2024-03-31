@@ -1,3 +1,14 @@
+## 1.1.0
+**Breaking Changes**
+* Minimum Supported flutter version is 3.19.5
+* Minimum Supported dart version is 3.0.0
+
+**Other**
+* Added more capabilities to AdblockerWebviewController
+  * `getTitle`, `clearCache` and `loadUrl` methods added
+  * Added caching for the blocked host list
+
+
 ## 1.0.2
 * Added support for page reload
 * Fixed some analysis issues
