@@ -18,7 +18,7 @@ class AdBlockerWebview extends StatefulWidget {
     this.options,
   });
 
-  /// Required: The initial [String] url that will be displayed in webview.
+  /// Required: The initial [Uri] url that will be displayed in webview.
   final Uri url;
 
   /// Required: The controller for [AdBlockerWebview].
