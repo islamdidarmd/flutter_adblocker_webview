@@ -4,7 +4,6 @@ import 'package:adblocker_webview/adblocker_webview.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller_impl.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:adblocker_webview/src/internal_adblocker_webview_controller.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 /// The controller for [AdBlockerWebview].
 /// Below is and Example of getting a singleton instance:
