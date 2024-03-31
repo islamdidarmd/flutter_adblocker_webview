@@ -45,17 +45,24 @@ abstract class AdBlockerWebviewController implements InternalWebviewController{
   /// Returns decision of if the webview can go back
   Future<bool> canGoBack();
 
-  /// Navigates webview to previous page
-  Future<void> goBack();
-
   /// Returns decision of if he webview can go forward
   Future<bool> canGoForward();
+
+  // Clears the cache of webview
+  Future<void> clearCache();
+
+  // Returns the title of currently loaded webpage
+  Future<String?> getTitle();
+
+  // Loads the given url
+  Future<void> loadUrl(String url);
+
+  /// Navigates webview to previous page
+  Future<void> goBack();
 
   /// Navigates the webview to forward page
   Future<void> goForward();
 
   /// Reloads the current page
   Future<void> reload();
-
-  Future<void> clearCache();
 }

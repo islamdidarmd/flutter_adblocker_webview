@@ -8,7 +8,6 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 ///Implementation for [AdBlockerWebviewController]
 class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
-
   AdBlockerWebviewControllerImpl({AdBlockerRepository? repository})
       : _repository = repository ?? AdBlockerRepositoryImpl();
   final AdBlockerRepository _repository;
@@ -44,21 +43,39 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
   }
 
   @override
-  Future<void> goBack() async {
-    if (_inAppWebViewController == null) {
-      return;
-    }
-
-    return _inAppWebViewController!.goBack();
-  }
-
-  @override
   Future<bool> canGoForward() async {
     if (_inAppWebViewController == null) {
       return false;
     }
 
     return _inAppWebViewController!.canGoForward();
+  }
+
+  @override
+  Future<void> clearCache() async {
+    if (_inAppWebViewController == null) {
+      return;
+    }
+
+    return _inAppWebViewController!.clearCache();
+  }
+
+  @override
+  Future<String?> getTitle() async {
+    if (_inAppWebViewController == null) {
+      return null;
+    }
+
+    return _inAppWebViewController!.getTitle();
+  }
+
+  @override
+  Future<void> goBack() async {
+    if (_inAppWebViewController == null) {
+      return;
+    }
+
+    return _inAppWebViewController!.goBack();
   }
 
   @override
@@ -71,20 +88,21 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
   }
 
   @override
+  Future<void> loadUrl(String url) async {
+    if (_inAppWebViewController == null) {
+      return;
+    }
+
+    return _inAppWebViewController!
+        .loadUrl(urlRequest: URLRequest(url: Uri.parse(url)));
+  }
+
+  @override
   Future<void> reload() async {
     if (_inAppWebViewController == null) {
       return;
     }
 
     return _inAppWebViewController!.reload();
-  }
-
-  @override
-  Future<void> clearCache() async {
-    if (_inAppWebViewController == null) {
-      return;
-    }
-
-    return _inAppWebViewController!.clearCache();
   }
 }
