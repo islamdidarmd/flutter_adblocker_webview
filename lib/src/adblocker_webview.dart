@@ -1,5 +1,8 @@
+import 'dart:isolate';
+
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
+import 'package:adblocker_webview/src/domain/mapper/host_mapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -78,36 +81,12 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     }
   }
 
-  void _setContentBlockers() {
-    final contentBlockerList = widget.adBlockerWebviewController.bannedHost
-        .map(
-          (e) => ContentBlocker(
-            trigger: ContentBlockerTrigger(
-              urlFilter: _createUrlFilterFromAuthority(e.authority),
-            ),
-            action: ContentBlockerAction(
-              type: ContentBlockerActionType.BLOCK,
-            ),
-          ),
-        )
-        .toList()
-      ..addAll(
-        widget.additionalHostsToBlock.map(
-          (e) => ContentBlocker(
-            trigger: ContentBlockerTrigger(
-              urlFilter: _createUrlFilterFromAuthority(e.authority),
-            ),
-            action: ContentBlockerAction(
-              type: ContentBlockerActionType.BLOCK,
-            ),
-          ),
-        ),
-      );
-
+  Future<void> _setContentBlockers() async {
+    final contentBlockerList =
+        mapHostToContentBlocker(widget.adBlockerWebviewController.bannedHost)
+          ..addAll(mapHostToContentBlocker(widget.additionalHostsToBlock));
     _inAppWebViewOptions?.crossPlatform.contentBlockers = contentBlockerList;
   }
-
-  String _createUrlFilterFromAuthority(String authority) => '.*.$authority/.*';
 
   void _clearContentBlockers() =>
       _inAppWebViewOptions?.crossPlatform.contentBlockers = [];
