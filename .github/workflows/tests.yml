@@ -1,0 +1,26 @@
+name: Flutter tests
+
+on:
+  pull_request:
+    branches: [ main, develop, release/* ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      FLUTTER_VERSION: '3.19.5'  # Update with your desired default version
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Flutter action
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        run: flutter test
