@@ -25,7 +25,7 @@ import 'package:adblocker_webview/src/internal_adblocker_webview_controller.dart
 
 ///ignore_for_file: avoid-late-keyword
 ///ignore_for_file: avoid-non-null-assertion
-abstract class AdBlockerWebviewController implements InternalWebviewController{
+abstract class AdBlockerWebviewController implements InternalWebviewController {
   static AdBlockerWebviewController? _instance;
 
   /// Returns an implementation of this class
