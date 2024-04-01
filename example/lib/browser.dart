@@ -36,6 +36,7 @@ class _BrowserState extends State<Browser> {
               });
             },
             shouldBlockAds: widget.shouldBlockAds,
+            additionalHostsToBlock: const [],
           ),
         ),
         Row(

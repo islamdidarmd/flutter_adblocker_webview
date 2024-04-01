@@ -1,4 +1,5 @@
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
+import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -16,6 +17,7 @@ class AdBlockerWebview extends StatefulWidget {
     this.onLoadError,
     this.onTitleChanged,
     this.options,
+    this.additionalHostsToBlock = const [],
   });
 
   /// Required: The initial [Uri] url that will be displayed in webview.
@@ -41,6 +43,8 @@ class AdBlockerWebview extends StatefulWidget {
   /// Invoked when the page title is changed.
   final void Function(InAppWebViewController controller, String? title)?
       onTitleChanged;
+
+  final List<Host> additionalHostsToBlock;
 
   /// Invoked when a loading error occurred.
   final void Function(
@@ -86,7 +90,19 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
             ),
           ),
         )
-        .toList();
+        .toList()
+      ..addAll(
+        widget.additionalHostsToBlock.map(
+          (e) => ContentBlocker(
+            trigger: ContentBlockerTrigger(
+              urlFilter: _createUrlFilterFromAuthority(e.authority),
+            ),
+            action: ContentBlockerAction(
+              type: ContentBlockerActionType.BLOCK,
+            ),
+          ),
+        ),
+      );
 
     _inAppWebViewOptions?.crossPlatform.contentBlockers = contentBlockerList;
   }
