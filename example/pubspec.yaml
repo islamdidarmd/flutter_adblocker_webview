@@ -13,7 +13,7 @@ dependencies:
 
   cupertino_icons: ^1.0.5
   adblocker_webview:
-    path: ../../adblocker_webview_flutter
+    path: ../
 
 dev_dependencies:
   flutter_test:
