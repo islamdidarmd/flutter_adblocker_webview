@@ -1,3 +1,6 @@
+## 1.1.1
+* Added ability to pass additional urls to block
+
 ## 1.1.0
 **Breaking Changes**
 * Minimum Supported flutter version is 3.19.5
