@@ -56,8 +56,12 @@ It's better to warm up the controller before displaying the webview. It's possib
       this.onLoadError,
       this.onTitleChanged,
       this.options,
+      this.additionalHostsToBlock = const [],
   });
 ```
+#### Caching
+- API response for Ad hosts is cached automatically and no config is required!
+
 ### Contribution
 Contributions are welcome 😄. Please file an issue [here](https://github.com/islamdidarmd/flutter_adblocker_webview/issues) if you want to include additional feature or found a bug!
 #### Guide
