@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:adblocker_webview/src/domain/mapper/host_mapper.dart';
