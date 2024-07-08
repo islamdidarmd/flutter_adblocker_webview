@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:isolate';
 
 import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class AdBlockerRepositoryImpl implements AdBlockerRepository {
@@ -29,14 +27,8 @@ class AdBlockerRepositoryImpl implements AdBlockerRepository {
   }
 
   Future<String> _getDataWithCache(String url) async {
-    final isolateToken = ServicesBinding.rootIsolateToken!;
-    return Isolate.run(
-      () async {
-        BackgroundIsolateBinaryMessenger.ensureInitialized(isolateToken);
-        final cacheManager = DefaultCacheManager();
-        final file = await cacheManager.getSingleFile(url);
-        return file.readAsString();
-      },
-    );
+    final cacheManager = DefaultCacheManager();
+    final file = await cacheManager.getSingleFile(url);
+    return file.readAsString();
   }
 }
