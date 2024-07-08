@@ -1,3 +1,7 @@
+## 1.1.2
+* Removed redundant isolate uses
+* Removed flutter version constraint in pubspec.yaml
+
 ## 1.1.1
 * Added ability to pass additional urls to block
 
