@@ -55,6 +55,12 @@ abstract class AdBlockerWebviewController implements InternalWebviewController {
   // Loads the given url
   Future<void> loadUrl(String url);
 
+  Future<void> loadData(
+    String data, {
+    String mimeType = 'text/html',
+    String encoding = 'utf8',
+  });
+
   /// Navigates webview to previous page
   Future<void> goBack();
 

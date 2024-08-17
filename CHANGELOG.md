@@ -1,3 +1,6 @@
+## 1.2.0
+* Added support for HTML string loading
+
 ## 1.1.2
 * Removed redundant isolate uses
 * Removed flutter version constraint in pubspec.yaml

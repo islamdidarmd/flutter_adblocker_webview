@@ -46,18 +46,22 @@ It's better to warm up the controller before displaying the webview. It's possib
   Supported params of [AdBlockerWebview](https://pub.dev/documentation/adblocker_webview/latest/adblocker_webview/AdBlockerWebview-class.html]) are:
   ```dart
   const AdBlockerWebview({
-      super.key,
-      required this.url,
-      required this.adBlockerWebviewController,
-      required this.shouldBlockAds,
-      this.onLoadStart,
-      this.onLoadFinished,
-      this.onProgress,
-      this.onLoadError,
-      this.onTitleChanged,
-      this.options,
-      this.additionalHostsToBlock = const [],
-  });
+        required this.adBlockerWebviewController,
+        required this.shouldBlockAds,
+        this.url,
+        this.initialHtmlData,
+        this.onLoadStart,
+        this.onLoadFinished,
+        this.onProgress,
+        this.onLoadError,
+        this.onTitleChanged,
+        this.options,
+        this.additionalHostsToBlock = const [],
+        super.key,
+        }) : assert(
+            (url == null && initialHtmlData != null) ||
+            (url != null && initialHtmlData == null),
+            'Both url and initialHtmlData can not be non null');
 ```
 #### Caching
 - API response for Ad hosts is cached automatically and no config is required!

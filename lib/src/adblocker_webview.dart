@@ -8,10 +8,10 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 /// appear inside of the webpages.
 class AdBlockerWebview extends StatefulWidget {
   const AdBlockerWebview({
-    required this.url,
     required this.adBlockerWebviewController,
     required this.shouldBlockAds,
-    super.key,
+    this.url,
+    this.initialHtmlData,
     this.onLoadStart,
     this.onLoadFinished,
     this.onProgress,
@@ -19,10 +19,16 @@ class AdBlockerWebview extends StatefulWidget {
     this.onTitleChanged,
     this.options,
     this.additionalHostsToBlock = const [],
-  });
+    super.key,
+  }) : assert(
+            (url == null && initialHtmlData != null) ||
+                (url != null && initialHtmlData == null),
+            'Both url and initialHtmlData can not be non null');
 
   /// Required: The initial [Uri] url that will be displayed in webview.
-  final Uri url;
+  final Uri? url;
+
+  final String? initialHtmlData;
 
   /// Required: The controller for [AdBlockerWebview].
   /// See more at [AdBlockerWebviewController].
@@ -110,6 +116,9 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
       onLoadStop: widget.onLoadFinished,
       onLoadError: widget.onLoadError,
       onTitleChanged: widget.onTitleChanged,
+      initialData: widget.initialHtmlData == null
+          ? null
+          : InAppWebViewInitialData(data: widget.initialHtmlData!),
     );
   }
 }

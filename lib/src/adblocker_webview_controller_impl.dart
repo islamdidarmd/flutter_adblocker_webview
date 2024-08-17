@@ -98,6 +98,22 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
   }
 
   @override
+  Future<void> loadData(
+    String data, {
+    String mimeType = 'text/html',
+    String encoding = 'utf8',
+  }) async {
+    if (_inAppWebViewController == null) {
+      return;
+    }
+    return _inAppWebViewController!.loadData(
+      data: data,
+      mimeType: mimeType,
+      encoding: encoding,
+    );
+  }
+
+  @override
   Future<void> reload() async {
     if (_inAppWebViewController == null) {
       return;
