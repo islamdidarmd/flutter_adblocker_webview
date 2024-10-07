@@ -2,18 +2,25 @@ name: adblocker_webview
 description: A webview for flutter with adblocking capability. It's currently based on Flutter InAppWebview Plugin.
 repository: https://github.com/islamdidarmd/flutter_adblocker_webview
 issue_tracker: https://github.com/islamdidarmd/flutter_adblocker_webview/issues
-version: 1.2.0
+version: 1.2.1-beta
 homepage: https://github.com/islamdidarmd/flutter_adblocker_webview
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.6.0
 
 dependencies:
   flutter:
     sdk: flutter
 
   flutter_cache_manager: ^3.3.1
-  flutter_inappwebview: ^5.8.0
+  flutter_inappwebview: ^6.0.0
+
+dependency_overrides:
+  flutter_inappwebview_ios:
+    git:
+      url: https://github.com/pichillilorenzo/flutter_inappwebview.git
+      ref: 1f22137f01e3152d890551c094dd4928cc907fb5
+      path: flutter_inappwebview_ios
 
 dev_dependencies:
   flutter_test:
