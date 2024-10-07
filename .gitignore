@@ -16,8 +16,10 @@ migrate_working_dir/
 *.iws
 .idea/
 
+#vscode related
+.vscode/
+
 #fvm related
-.fvm/flutter_sdk
 
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
@@ -33,3 +35,6 @@ migrate_working_dir/
 build/
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# FVM Version Cache
+.fvm/
