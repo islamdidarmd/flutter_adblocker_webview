@@ -110,7 +110,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     return InAppWebView(
       key: _webViewKey,
       onWebViewCreated: widget.adBlockerWebviewController.setInternalController,
-      initialUrlRequest: URLRequest(url: widget.url),
+      initialUrlRequest: URLRequest(url: WebUri.uri(widget.url!)),
       initialOptions: _inAppWebViewOptions,
       onLoadStart: widget.onLoadStart,
       onLoadStop: widget.onLoadFinished,
