@@ -94,7 +94,7 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
     }
 
     return _inAppWebViewController!
-        .loadUrl(urlRequest: URLRequest(url: Uri.parse(url)));
+        .loadUrl(urlRequest: URLRequest(url: WebUri(url)));
   }
 
   @override
