@@ -6,7 +6,7 @@ version: 1.2.1-beta
 homepage: https://github.com/islamdidarmd/flutter_adblocker_webview
 
 environment:
-  sdk: '>=3.5.3 <4.0.0'
+  sdk: ^3.5.3
 
 dependencies:
   flutter:
