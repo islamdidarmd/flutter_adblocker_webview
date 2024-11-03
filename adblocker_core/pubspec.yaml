@@ -1,5 +1,5 @@
 name: adblocker_core
-description: "Core plugin for adblocker"
+description: "Core plugin for adblocker weview"
 version: 0.0.1
 homepage: 'none'
 
@@ -12,10 +12,8 @@ dependencies:
   ffigen: ^15.0.0
   flutter:
     sdk: flutter
-  plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
-  flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
   very_good_analysis: ^6.0.0

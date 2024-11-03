@@ -1,7 +1,3 @@
-//
-// Created by Edsuns on 2021/1/14.
-//
-
 #ifndef HASHMAP_H
 #define HASHMAP_H
 

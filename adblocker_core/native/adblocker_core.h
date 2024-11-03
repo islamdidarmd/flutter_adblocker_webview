@@ -1,6 +1,3 @@
-#ifndef ADBLOCKER_CORE_H
-#define ADBLOCKER_CORE_H
-
 #include <stddef.h>  // For size_t
 #include <stdint.h>  // For fixed-width integer types
 #include <stdbool.h> // For bool type
@@ -60,5 +57,4 @@ void string_array_free(StringArray* array);
 }  // extern "C"
 #endif
 
-#endif // ADBLOCKER_CORE_H
 

@@ -4,20 +4,20 @@
 #include <vector>
 #include <cstring>
 
-class AdBlockerCoreImpl {
+class AdBlockerCore {
 private:
     AdBlockClient* client;
     char* rawData;
     char* processedData;
 
 public:
-    AdBlockerCoreImpl() {
+    AdBlockerCore() {
         client = new AdBlockClient();
         rawData = nullptr;
         processedData = nullptr;
     }
 
-    ~AdBlockerCoreImpl() {
+    ~AdBlockerCore() {
         delete client;
         delete[] rawData;
         delete[] processedData;
@@ -27,38 +27,37 @@ public:
     const AdBlockClient* getClient() const { return client; }
 };
 
-// Constructor and destructor
+
 extern "C" AdBlockerCore* adblocker_core_create() {
-    return reinterpret_cast<AdBlockerCore*>(new AdBlockerCoreImpl());
+    return reinterpret_cast<AdBlockerCore*>(new AdBlockerCore());
 }
 
 extern "C" void adblocker_core_destroy(AdBlockerCore* core) {
-    delete reinterpret_cast<AdBlockerCoreImpl*>(core);
+    delete reinterpret_cast<AdBlockerCore*>(core);
 }
 
-// Core functionality
 extern "C" bool adblocker_core_is_generic_element_hiding_enabled(const AdBlockerCore* core) {
-    auto impl = reinterpret_cast<const AdBlockerCoreImpl*>(core);
+    auto impl = reinterpret_cast<const AdBlockerCore*>(core);
     return impl->getClient()->isGenericElementHidingEnabled;
 }
 
 extern "C" void adblocker_core_set_generic_element_hiding_enabled(AdBlockerCore* core, bool enabled) {
-    auto impl = reinterpret_cast<AdBlockerCoreImpl*>(core);
+        auto impl = reinterpret_cast<AdBlockerCore*>(core);
     impl->getClient()->isGenericElementHidingEnabled = enabled;
 }
 
 extern "C" void adblocker_core_load_basic_data(AdBlockerCore* core, const char* data, size_t length, bool preserve_rules) {
-    auto impl = reinterpret_cast<AdBlockerCoreImpl*>(core);
+    auto impl = reinterpret_cast<AdBlockerCore*>(core);
     impl->getClient()->parse(data, preserve_rules);
 }
 
 extern "C" void adblocker_core_load_processed_data(AdBlockerCore* core, const char* data, size_t length) {
-    auto impl = reinterpret_cast<AdBlockerCoreImpl*>(core);
+    auto impl = reinterpret_cast<AdBlockerCore*>(core);
     impl->getClient()->deserialize(const_cast<char*>(data));
 }
 
 extern "C" ProcessedData adblocker_core_get_processed_data(const AdBlockerCore* core) {
-    auto impl = reinterpret_cast<const AdBlockerCoreImpl*>(core);
+    auto impl = reinterpret_cast<const AdBlockerCore*>(core);
     int size;
     char* data = impl->getClient()->serialize(&size, false);
     return ProcessedData{data, static_cast<size_t>(size)};
@@ -71,7 +70,7 @@ extern "C" void processed_data_free(ProcessedData* data) {
 }
 
 extern "C" int32_t adblocker_core_get_filters_count(const AdBlockerCore* core) {
-    auto impl = reinterpret_cast<const AdBlockerCoreImpl*>(core);
+    auto impl = reinterpret_cast<const AdBlockerCore*>(core);
     auto client = impl->getClient();
     return client->numFilters
            + client->numCosmeticFilters
@@ -90,10 +89,10 @@ extern "C" int32_t adblocker_core_get_filters_count(const AdBlockerCore* core) {
 
 extern "C" MatchResult adblocker_core_matches(const AdBlockerCore* core, const char* url, 
     const char* first_party_domain, int32_t filter_option) {
-    auto impl = reinterpret_cast<const AdBlockerCoreImpl*>(core);
+    auto impl = reinterpret_cast<const AdBlockerCore*>(core);
     Filter* matchedFilter;
     Filter* matchedExceptionFilter;
-    bool shouldBlock = const_cast<AdBlockerCoreImpl*>(impl)->getClient()->matches(
+    bool shouldBlock = const_cast<AdBlockerCore*>(impl)->getClient()->matches(
         url,
         static_cast<FilterOption>(filter_option),
         first_party_domain,
@@ -109,12 +108,12 @@ extern "C" MatchResult adblocker_core_matches(const AdBlockerCore* core, const c
 }
 
 extern "C" const char* adblocker_core_get_element_hiding_selectors(const AdBlockerCore* core, const char* url) {
-    auto impl = reinterpret_cast<const AdBlockerCoreImpl*>(core);
+    auto impl = reinterpret_cast<const AdBlockerCore*>(core);
     return const_cast<AdBlockClient*>(impl->getClient())->getElementHidingSelectors(url);
 }
 
 extern "C" StringArray adblocker_core_get_extended_css_selectors(const AdBlockerCore* core, const char* url) {
-    auto impl = reinterpret_cast<const AdBlockerCoreImpl*>(core);
+    auto impl = reinterpret_cast<const AdBlockerCore*>(core);
     const LinkedList<std::string>* rules = const_cast<AdBlockClient*>(impl->getClient())->getExtendedCssSelectors(url);
     
     StringArray result = {nullptr, 0};
@@ -131,7 +130,7 @@ extern "C" StringArray adblocker_core_get_extended_css_selectors(const AdBlocker
 }
 
 extern "C" StringArray adblocker_core_get_css_rules(const AdBlockerCore* core, const char* url) {
-    auto impl = reinterpret_cast<const AdBlockerCoreImpl*>(core);
+    auto impl = reinterpret_cast<const AdBlockerCore*>(core);
     const LinkedList<std::string>* rules = const_cast<AdBlockClient*>(impl->getClient())->getCssRules(url);
     
     StringArray result = {nullptr, 0};
@@ -148,7 +147,7 @@ extern "C" StringArray adblocker_core_get_css_rules(const AdBlockerCore* core, c
 }
 
 extern "C" StringArray adblocker_core_get_scriptlets(const AdBlockerCore* core, const char* url) {
-    auto impl = reinterpret_cast<const AdBlockerCoreImpl*>(core);
+    auto impl = reinterpret_cast<const AdBlockerCore*>(core);
     const LinkedList<std::string>* rules = const_cast<AdBlockClient*>(impl->getClient())->getScriptlets(url);
     
     StringArray result = {nullptr, 0};
