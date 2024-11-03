@@ -1,6 +1,8 @@
+import 'package:adblocker_core_example/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adblocker_core/adblocker_core.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +22,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _adblockerCorePlugin.init();
+    _initAdblockerCore();
   }
 
   @override
@@ -35,5 +37,19 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  // ignore: unused_element
+  void _initAdblockerCore() async {
+    final rawData = await DefaultAssetBundle.of(context).loadString(Assets.adguardBase);
+    await _adblockerCorePlugin.init();
+    await _adblockerCorePlugin.processRawData(rawData);
+
+    await Future.delayed(const Duration(seconds: 1));
+    final filtersCount = await _adblockerCorePlugin.getFilterCount();
+    setState(() {
+      _platformVersion = filtersCount.toString();
+    });
+    await _adblockerCorePlugin.dispose();
   }
 }

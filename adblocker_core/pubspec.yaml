@@ -28,8 +28,3 @@ flutter:
         pluginClass: AdblockerCorePlugin
       ios:
         pluginClass: AdblockerCorePlugin
-ffigen:
-  output: lib/generated/generated_bindings.dart
-  headers:
-    entry-points:
-    - shared/hello.h
