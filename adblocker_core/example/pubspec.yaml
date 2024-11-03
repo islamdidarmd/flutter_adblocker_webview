@@ -5,21 +5,20 @@ publish_to: 'none'
 environment:
   sdk: ^3.5.3
 dependencies:
-  flutter:
-    sdk: flutter
-
   adblocker_core:
     path: ../
   cupertino_icons: ^1.0.8
+  flutter:
+    sdk: flutter
 
 dev_dependencies:
-  integration_test:
-    sdk: flutter
+  build_runner: any
+  flutter_gen_runner: any
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   very_good_analysis: ^6.0.0
-  flutter_gen_runner: any
-  build_runner: any
 
 flutter:
   uses-material-design: true

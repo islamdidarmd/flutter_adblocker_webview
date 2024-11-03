@@ -7,7 +7,7 @@ import 'package:ffi/ffi.dart';
 
 class AdBlockerFilter implements Filter {
   AdBlockerFilter();
-  late AdBlockerCoreNative _nativeLibrary;
+  AdBlockerCoreNative? _nativeLibrary;
   late Pointer<AdBlockerCore> _core;
 
   @override
@@ -22,18 +22,18 @@ class AdBlockerFilter implements Filter {
     } else {
       throw UnsupportedError('Unsupported platform');
     }
-    _core = _nativeLibrary.adblocker_core_create();
+    _core = _nativeLibrary!.adblocker_core_create();
   }
 
   @override
   Future<void> dispose() async {
-    _nativeLibrary.adblocker_core_destroy(_core);
+    _nativeLibrary?.adblocker_core_destroy(_core);
   }
 
   @override
   Future<void> processRawData(String rawData) async {
     final nativeRawData = rawData.toNativeUtf8();
-    _nativeLibrary.adblocker_core_load_basic_data(
+    _nativeLibrary!.adblocker_core_load_basic_data(
       _core,
       nativeRawData.cast<Char>(),
       0,
@@ -43,18 +43,7 @@ class AdBlockerFilter implements Filter {
   }
 
   @override
-  Future<void> loadProcessedData(String processedData) async {
-    final nativeProcessedData = processedData.toNativeUtf8();
-    _nativeLibrary.adblocker_core_load_processed_data(
-      _core,
-      nativeProcessedData.cast<Char>(),
-      0,
-    );
-    calloc.free(nativeProcessedData);
-  }
-
-  @override
   Future<int> getRulesCount() async {
-    return _nativeLibrary.adblocker_core_get_filters_count(_core);
+    return _nativeLibrary!.adblocker_core_get_filters_count(_core);
   }
 }
