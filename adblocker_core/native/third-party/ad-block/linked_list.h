@@ -1,7 +1,3 @@
-//
-// Created by Edsuns on 2021/1/16.
-//
-
 #ifndef LINKED_LIST_H
 #define LINKED_LIST_H
 

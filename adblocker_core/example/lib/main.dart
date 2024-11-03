@@ -1,8 +1,6 @@
+import 'package:adblocker_core/adblocker_core.dart';
 import 'package:adblocker_core_example/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
-
-import 'package:adblocker_core/adblocker_core.dart';
-import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,13 +14,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  final _adblockerCorePlugin = AdblockerCore();
+  String _rulesCount = 'Unknown';
+  final _adblockerFilter = AdBlockerFilter();
 
   @override
   void initState() {
     super.initState();
-    _initAdblockerCore();
+    _initFilter();
   }
 
   @override
@@ -33,23 +31,24 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Text('Activated rules count: $_rulesCount\n'),
         ),
       ),
     );
   }
 
-  // ignore: unused_element
-  void _initAdblockerCore() async {
-    final rawData = await DefaultAssetBundle.of(context).loadString(Assets.adguardBase);
-    await _adblockerCorePlugin.init();
-    await _adblockerCorePlugin.processRawData(rawData);
+  // ignore: unused_element, avoid_void_async
+  void _initFilter() async {
+    final rawData =
+        await DefaultAssetBundle.of(context).loadString(Assets.adguardBase);
+    await _adblockerFilter.init();
+    await _adblockerFilter.processRawData(rawData);
 
-    await Future.delayed(const Duration(seconds: 1));
-    final filtersCount = await _adblockerCorePlugin.getFilterCount();
+    await Future<void>.delayed(const Duration(seconds: 1));
+    final rulesCount = await _adblockerFilter.getRulesCount();
     setState(() {
-      _platformVersion = filtersCount.toString();
+      _rulesCount = rulesCount.toString();
     });
-    await _adblockerCorePlugin.dispose();
+    await _adblockerFilter.dispose();
   }
 }

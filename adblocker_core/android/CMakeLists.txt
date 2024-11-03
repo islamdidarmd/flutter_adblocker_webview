@@ -1,10 +1,8 @@
-# Sets the minimum version of CMake required to build your native library.
-# This ensures that a certain set of CMake features is available to
-# your build.
+# Do not change this cmake_minimum_required version.
+# This version is recommended for flutter.
 
 cmake_minimum_required(VERSION 3.10)
 
-# Gather all source files from related directories
 file(GLOB ADBLOCK_SOURCES 
      "../native/third-party/ad-block/*.cc"
      "../native/third-party/ad-block/*.cpp"
@@ -14,20 +12,12 @@ file(GLOB ADBLOCK_SOURCES
      "../native/third-party/hashset-cpp/*.cc"
 )
 
-add_library( # Specifies the name of the library.
-             adblocker_core
-
-             # Sets the library as a shared library.
+add_library(adblocker_core
              SHARED
-
-             # Provides a relative path to your source file(s).
              ../native/adblocker_core.cpp
-             # Add the AdBlock library source files
              ${ADBLOCK_SOURCES}
-             # Add any other required source files
-)
+             )
 
-# Add include directories if needed
 target_include_directories(adblocker_core PRIVATE
     ../native/third-party/ad-block
 )

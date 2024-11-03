@@ -1,1 +1,1 @@
-export 'src/adblocker_core_binder.dart';
+export 'src/adblocker_filter.dart';
