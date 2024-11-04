@@ -1,0 +1,20 @@
+name: adblocker_manager
+description: "Manager for adblocker filters"
+version: 0.1.0
+homepage: 'none'
+publish_to: none
+
+environment:
+  sdk: ^3.5.3
+
+dependencies:
+  adblocker_core:
+    path: ../adblocker_core
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^5.1.0
+
