@@ -5,10 +5,13 @@ issue_tracker: https://github.com/islamdidarmd/flutter_adblocker_webview/issues
 version: 1.2.1-beta
 homepage: https://github.com/islamdidarmd/flutter_adblocker_webview
 
+
 environment:
   sdk: ^3.5.3
 
 dependencies:
+  adblocker_manager:
+    path: adblocker_manager
   flutter:
     sdk: flutter
 
