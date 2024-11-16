@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
+import 'package:adblocker_webview/src/css.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -82,7 +83,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     super.initState();
     _settings =
         widget.settings ?? InAppWebViewSettings(userAgent: _getUserAgent());
-
+    InAppWebViewController.setWebContentsDebuggingEnabled(true);
     _setJavaScriptHandlers();
   }
 
@@ -97,9 +98,13 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
       initialUrlRequest: URLRequest(url: WebUri.uri(widget.url!)),
       initialSettings: _settings,
       onLoadStart: (controller, uri) {
+        controller.evaluateJavascript(source: elementHidingJS);
         widget.onLoadStart?.call(controller, uri);
       },
-      onLoadStop: widget.onLoadFinished,
+      onLoadStop: (controller, uri) {
+        //controller.evaluateJavascript(source: helloJS);
+        widget.onLoadFinished?.call(controller,uri);
+      },
       onLoadError: widget.onLoadError,
       onTitleChanged: widget.onTitleChanged,
       initialData: widget.initialHtmlData == null
@@ -110,18 +115,18 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
 
   void _setJavaScriptHandlers() {
     _controllerCompleter.future.then((controller) {
-      controller
+       controller
         ..addJavaScriptHandler(
           handlerName: 'getStyleSheet',
           callback: (List<dynamic> arguments) {
-            print(arguments);
+            print("Passed arguments: $arguments");
             return _filterManager.getStyleSheet(arguments.first as String);
           },
         )
         ..addJavaScriptHandler(
           handlerName: 'getExtendedCssStyleSheet',
           callback: (List<dynamic> arguments) {
-            print(arguments);
+            print("Passed arguments: $arguments");
             return _filterManager
                 .getExtendedCssStyleSheet(arguments.first as String);
           },
@@ -129,10 +134,16 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
         ..addJavaScriptHandler(
           handlerName: 'getScriptlets',
           callback: (List<dynamic> arguments) {
-            print(arguments);
+            print("Passed arguments: $arguments");
             return _filterManager.getScriptlets(arguments.first as String);
           },
-        );
+        )..addJavaScriptHandler(
+          handlerName: "hello",
+          callback: (arguments) {
+            print("Passed arguments: $arguments");
+            return "hello from flutter";
+          },
+      );
     });
   }
 
