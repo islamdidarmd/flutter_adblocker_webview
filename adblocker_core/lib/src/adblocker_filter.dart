@@ -46,4 +46,81 @@ class AdBlockerFilter implements Filter {
   Future<int> getRulesCount() async {
     return _nativeLibrary!.adblocker_core_get_filters_count(_core);
   }
+
+  @override
+  Future<bool> isAd(String url, String host, FilterOption filterOption) async {
+    final result = _nativeLibrary!.adblocker_core_matches(
+      _core,
+      url.toNativeUtf8().cast<Char>(),
+      host.toNativeUtf8().cast<Char>(),
+      filterOption.value,
+    );
+    return result.should_block;
+  }
+
+  @override
+  Future<String> getElementHidingSelector(String host) async {
+    final nativeResult =
+        _nativeLibrary!.adblocker_core_get_element_hiding_selectors(
+      _core,
+      host.toNativeUtf8().cast<Char>(),
+    );
+    final result = nativeResult.cast<Utf8>().toDartString();
+    calloc.free(nativeResult);
+    return result;
+  }
+
+  @override
+  Future<List<String>> getExtendedCssSelectors(String host) async {
+    final nativeResult =
+        _nativeLibrary!.adblocker_core_get_extended_css_selectors(
+      _core,
+      host.toNativeUtf8().cast<Char>(),
+    );
+    final result = <String>[];
+
+    for (var i = 0; i < nativeResult.length; i++) {
+      final pointer = nativeResult.data[i];
+      result.add(pointer.cast<Utf8>().toDartString());
+    }
+
+    calloc.free(nativeResult.data);
+    return result;
+  }
+
+  @override
+  Future<List<String>> getCssRules(String host) async {
+    final nativeResult =
+        _nativeLibrary!.adblocker_core_get_css_rules(
+      _core,
+      host.toNativeUtf8().cast<Char>(),
+    );
+    final result = <String>[];
+
+    for (var i = 0; i < nativeResult.length; i++) {
+      final pointer = nativeResult.data[i];
+      result.add(pointer.cast<Utf8>().toDartString());
+    }
+
+    calloc.free(nativeResult.data);
+    return result;
+  }
+
+  @override
+  Future<List<String>> getScriptlets(String host) async {
+    final nativeResult =
+        _nativeLibrary!.adblocker_core_get_scriptlets(
+      _core,
+      host.toNativeUtf8().cast<Char>(),
+    );
+    final result = <String>[];
+
+    for (var i = 0; i < nativeResult.length; i++) {
+      final pointer = nativeResult.data[i];
+      result.add(pointer.cast<Utf8>().toDartString());
+    }
+
+    calloc.free(nativeResult.data);
+    return result;
+  }
 }
