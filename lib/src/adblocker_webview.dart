@@ -93,8 +93,8 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   void _setNavigationDelegate() {
     _webViewController.setNavigationDelegate(
       NavigationDelegate(
-        onPageStarted: (url) {
-          _webViewController.runJavaScript(elementHidingJS);
+        onPageStarted: (url) async {
+          await _webViewController.runJavaScript(elementHidingJS);
           widget.onLoadStart?.call(url);
         },
         onPageFinished: (url) {
@@ -131,6 +131,15 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
           debugLog("Extended stylesheet: $styleSheet");
           _webViewController
               .runJavaScript(sendExtendedStyleSheetToJs(styleSheet));
+        },
+      )
+      ..addJavaScriptChannel(
+        'GetScriptlets',
+        onMessageReceived: (message) async {
+          debugLog("Passed Scriptlets arguments: ${message.message}");
+          final scriptles = await _filterManager.getScriptlets(message.message);
+          debugLog("Scriptlets: $scriptles");
+          _webViewController.runJavaScript(sendScriptlesToJs(scriptles));
         },
       );
     /* _controllerCompleter.future.then((controller) {

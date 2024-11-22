@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 const _extendedCss = r'''
 /*! extended-css - v1.3.10 - Mon Feb 15 2021
 * https://github.com/AdguardTeam/ExtendedCss
@@ -112,7 +114,35 @@ String sendExtendedStyleSheetToJs(String stylesheet) => r'''
     }
     { { DEBUG } } console.log(`ExtendedCss rules success for ${document.location.href}`);
     { { DEBUG } } console.log('element hiding finished');
+    
+    { { DEBUG } } console.log('Calling scriptles');
+    GetScriptlets.postMessage(document.location.href);
 '''
     .replaceAll('{ { DEBUG } }', '')
     .replaceAll('{{DEBUG}}', '')
     .replaceAll('{{param}}', stylesheet);
+
+String sendScriptlesToJs(List<String> scriptles) => r'''
+    var scriptletArray = {{param}};
+
+    for (let item of scriptletArray) {
+        let script = scriptlets.invoke({
+            name: item[0],
+            args: item.slice(1)
+        });
+    
+        { { DEBUG } } !script && console.log(`invalid scriptlets: ${JSON.stringify(item)}`);
+    
+        try {
+            // don't use eval() here, it may be blocked by scriptlets
+            new Function(script)();
+        } catch (err) {
+            { { DEBUG } } console.log('scriptlets went wrong: ' + err);
+            throw err;
+        }
+    }
+    {{DEBUG}} console.log(`applied ${scriptletArray.length} scriptlets for ${document.location.href}`);
+'''
+    .replaceAll('{ { DEBUG } }', '')
+    .replaceAll('{{DEBUG}}', '')
+    .replaceAll('{{param}}', scriptles.toString());
