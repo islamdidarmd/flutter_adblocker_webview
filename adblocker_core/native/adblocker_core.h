@@ -1,60 +1,43 @@
-#include <stddef.h>  // For size_t
-#include <stdint.h>  // For fixed-width integer types
-#include <stdbool.h> // For bool type
+#ifndef EASYLIST_BRIDGE_H
+#define EASYLIST_BRIDGE_H
+
+#include <stdint.h>
+#include "parser/easylist_parser.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Opaque pointer to hide C++ implementation
-typedef struct AdBlockerCore AdBlockerCore;
+// Opaque type for EasyListParser
+typedef struct EasyListParser EasyListParser;
 
-// Result structure for matches - using C-compatible types
-typedef struct {
-    bool should_block;
-    const char* matched_rule;         // Owned by AdBlockClient, do not free
-    const char* matched_exception_rule; // Owned by AdBlockClient, do not free
-} MatchResult;
+#ifdef _WIN32
+    #define EASYLIST_EXPORT __declspec(dllexport)
+#else
+    #define EASYLIST_EXPORT __attribute__((visibility("default"))) __attribute__((used))
+#endif
 
-// Constructor and destructor
-AdBlockerCore* adblocker_core_create();
-void adblocker_core_destroy(AdBlockerCore* core);
+// Parser creation and destruction
+EASYLIST_EXPORT EasyListParser* easy_list_create_parser();
+EASYLIST_EXPORT void easy_list_destroy_parser(EasyListParser* parser);
 
 // Core functionality
-bool adblocker_core_is_generic_element_hiding_enabled(const AdBlockerCore* core);
-void adblocker_core_set_generic_element_hiding_enabled(AdBlockerCore* core, bool enabled);
-void adblocker_core_load_basic_data(AdBlockerCore* core, const char* data, size_t length, bool preserve_rules);
-void adblocker_core_load_processed_data(AdBlockerCore* core, const char* data, size_t length);
-
-// For processed data output
-typedef struct {
-    char* data;
-    size_t length;
-} ProcessedData;
-
-ProcessedData adblocker_core_get_processed_data(const AdBlockerCore* core);
-void processed_data_free(ProcessedData* data);
-
-int32_t adblocker_core_get_filters_count(const AdBlockerCore* core);
-
-// Matching and filtering
-MatchResult adblocker_core_matches(const AdBlockerCore* core, const char* url, const char* first_party_domain, int32_t filter_option);
-
-const char* adblocker_core_get_element_hiding_selectors(const AdBlockerCore* core, const char* url);
-
-// For string array outputs
+EASYLIST_EXPORT bool easy_list_load_from_file(EasyListParser* parser, const char* file_path);
+EASYLIST_EXPORT bool easy_list_is_url_blocked(EasyListParser* parser, const char* url);
+EASYLIST_EXPORT char* easy_list_get_ad_selectors(EasyListParser* parser);
+// Structure to return array of strings
 typedef struct {
     char** data;
     size_t length;
 } StringArray;
+// Memory management
+EASYLIST_EXPORT void easy_list_free_string(char* str);
 
-StringArray adblocker_core_get_extended_css_selectors(const AdBlockerCore* core, const char* url);
-StringArray adblocker_core_get_css_rules(const AdBlockerCore* core, const char* url);
-StringArray adblocker_core_get_scriptlets(const AdBlockerCore* core, const char* url);
-void string_array_free(StringArray* array);
+EASYLIST_EXPORT StringArray easy_list_get_blocked_domains(EasyListParser* parser);
+EASYLIST_EXPORT void easy_list_free_string_array(StringArray array);
 
 #ifdef __cplusplus
-}  // extern "C"
+}
 #endif
 
-
+#endif // EASYLIST_BRIDGE_H

@@ -4,12 +4,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 file(GLOB ADBLOCK_SOURCES 
-     "../native/third-party/ad-block/*.cc"
-     "../native/third-party/ad-block/*.cpp"
-     "../native/third-party/bloom-filter-cpp/*.cpp"
-     "../native/third-party/bloom-filter-cpp/*.cc"
-     "../native/third-party/hashset-cpp/*.cpp"
-     "../native/third-party/hashset-cpp/*.cc"
+     "../native/parser/*.cpp"
 )
 
 add_library(adblocker_core
@@ -19,7 +14,7 @@ add_library(adblocker_core
              )
 
 target_include_directories(adblocker_core PRIVATE
-    ../native/third-party/ad-block
+    ../native/parser
 )
 
 set_target_properties(adblocker_core PROPERTIES

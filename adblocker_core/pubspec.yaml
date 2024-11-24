@@ -27,3 +27,6 @@ flutter:
         pluginClass: AdblockerCorePlugin
       ios:
         pluginClass: AdblockerCorePlugin
+
+  assets:
+    - assets/easylist.txt

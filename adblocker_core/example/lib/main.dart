@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:adblocker_core/adblocker_core.dart';
 import 'package:adblocker_core_example/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,15 +42,23 @@ class _MyAppState extends State<MyApp> {
 
   // ignore: unused_element, avoid_void_async
   void _initFilter() async {
-    final rawData =
-        await DefaultAssetBundle.of(context).loadString(Assets.adguardBase);
+    final rawData = await DefaultAssetBundle.of(context).load(Assets.easyPrivacyLite);
+
+    final dir = await getApplicationSupportDirectory();
+    final filePath = '${dir.path}/easy_privacy.txt';
+    final file = File(filePath);
+    if(!file.existsSync()) {
+      file.createSync();
+    }
+    file.writeAsBytesSync(rawData.buffer.asUint8List());
+
     await _adblockerFilter.init();
-    await _adblockerFilter.processRawData(rawData);
+    await _adblockerFilter.processFile(filePath);
 
     await Future<void>.delayed(const Duration(seconds: 1));
-    final rulesCount = await _adblockerFilter.getRulesCount();
+    final blockedUrls = await _adblockerFilter.getBlockedUrls();
     setState(() {
-      _rulesCount = rulesCount.toString();
+      _rulesCount = blockedUrls.toString();
     });
     await _adblockerFilter.dispose();
   }
