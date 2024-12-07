@@ -1,6 +1,7 @@
 {
-    "files.associations": {
-        "unordered_set": "cpp",
-        "cstring": "cpp"
-    }
+  "files.associations": {
+    "unordered_set": "cpp",
+    "cstring": "cpp"
+  },
+  "dart.flutterSdkPath": ".fvm/versions/3.24.5"
 }
