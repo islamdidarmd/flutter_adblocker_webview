@@ -96,15 +96,15 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   }
 
   Future<void> _setNavigationDelegate() async {
-    _webViewController.setNavigationDelegate(
+    await _webViewController.setNavigationDelegate(
       NavigationDelegate(
         onPageStarted: (url) async {
+          _injectHidingScript();
           _injectBlockingScript();
           widget.onLoadStart?.call(url);
         },
         onPageFinished: (url) {
           widget.onLoadFinished?.call(url);
-          _injectHidingScript();
         },
         onProgress: (progress) => widget.onProgress?.call(progress),
         onHttpError: (error) => widget.onLoadError?.call(
@@ -124,7 +124,9 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   }
 
   void _injectHidingScript() {
-    _webViewController.runJavaScript(elementHidingScript);
+    _webViewController.runJavaScript(elemHide);
+    _webViewController.runJavaScript(scriptLet);
+    //_webViewController.runJavaScript(elementHidingScript);
   }
 
   /*void _setJavaScriptHandlers() {
