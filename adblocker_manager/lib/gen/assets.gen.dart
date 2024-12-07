@@ -13,8 +13,9 @@ class Assets {
   static const String adguardAnnyoance = 'assets/adguard_annyoance.txt';
   static const String adguardBase = 'assets/adguard_base.txt';
   static const String easyPrivacyLite = 'assets/easy_privacy_lite.txt';
+  static const String easylist = 'assets/easylist.txt';
 
   /// List of all assets
   static List<String> get values =>
-      [adguardAnnyoance, adguardBase, easyPrivacyLite];
+      [adguardAnnyoance, adguardBase, easyPrivacyLite, easylist];
 }

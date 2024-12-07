@@ -17,7 +17,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _rulesCount = 'Unknown';
+  int _rulesCount = 0;
+  String _rules = 'Unknown';
   final _adblockerFilter = AdBlockerFilter();
 
   @override
@@ -33,8 +34,13 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Activated rules count: $_rulesCount\n'),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Text('Activated rules count: $_rulesCount\n'),
+              Text('Block List:\n$_rules'),
+            ],
+          ),
         ),
       ),
     );
@@ -42,10 +48,10 @@ class _MyAppState extends State<MyApp> {
 
   // ignore: unused_element, avoid_void_async
   void _initFilter() async {
-    final rawData = await DefaultAssetBundle.of(context).load(Assets.easyPrivacyLite);
+    final rawData = await DefaultAssetBundle.of(context).load('assets/easylist.txt');
 
     final dir = await getApplicationSupportDirectory();
-    final filePath = '${dir.path}/easy_privacy.txt';
+    final filePath = '${dir.path}/easylist.txt';
     final file = File(filePath);
     if(!file.existsSync()) {
       file.createSync();
@@ -58,7 +64,8 @@ class _MyAppState extends State<MyApp> {
     await Future<void>.delayed(const Duration(seconds: 1));
     final blockedUrls = await _adblockerFilter.getBlockedUrls();
     setState(() {
-      _rulesCount = blockedUrls.toString();
+      _rulesCount = blockedUrls.length;
+      _rules = blockedUrls.join('\n');
     });
     await _adblockerFilter.dispose();
   }

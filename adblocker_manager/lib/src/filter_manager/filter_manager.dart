@@ -5,9 +5,8 @@ abstract interface class FilterManager {
   static FilterManager create() => AdBlockerFilterManager();
 
   Future<void> init(AdBlockerFilterConfig config);
-  Future<void> isAd(String url, String host);
-  Future<String> getStyleSheet(String host);
-  Future<String> getExtendedCssStyleSheet(String host);
-  Future<List<String>> getScriptlets(String host);
+  Future<List<String>> getBlockedUrls();
+  Future<bool> isAd(String url);
+  Future<String> getElementHidingSelectors();
   Future<void> dispose();
 }

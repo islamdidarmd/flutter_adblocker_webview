@@ -1,3 +1,6 @@
+String contentPlaceholder = '{{CONTENT}}';
+
+String get scriptWrapper => '''
 (function () {
     // Listening for the appearance of the body element to execute the script as soon as possible before the `interactive` event.
     const config = { attributes: false, childList: true, subtree: true };
@@ -5,7 +8,7 @@
         for (const mutation of mutationsList) {
             if (mutation.type === 'childList') {
                 if (document.getElementsByTagName('body')[0]) {
-                    {{DEBUG}} console.log('body element has appeared');
+                     console.log('body element has appeared');
                     // Execute the script when the body element appears.
                     script();
                     // Mission accomplished, no more to observe.
@@ -40,7 +43,7 @@
         window.removeEventListener('load', script);
     }
     const script = function () {
-        {{INJECTION}}
+        $contentPlaceholder
         removeListeners();
     }
     if (document.readyState == 'interactive' || document.readyState == 'complete') {
@@ -48,33 +51,39 @@
     } else {
         addListeners();
     }
-})(),
-function onStyleSheetReceived(styleSheet) {
-    if (styleSheet.length) {
-      { { DEBUG } } console.log('stylesheet length: ' + styleSheet.length);
-      var html = document.getElementsByTagName('html')[0];
-      var style = document.createElement('style');
-      html.appendChild(style);
-      style.textContent = styleSheet;
-      { { DEBUG } } console.log('finished injecting stylesheet');
-    } else {
-      { { DEBUG } } console.log('stylesheet is empty, skipped');
+})();
+''';
+
+String get resourceLoadingBlockerScript {
+  final content = '''
+    const blockedUrls = ['ads', 'tracking', 'doubleclick.net', 'googlesyndication.com'];
+
+// Override XMLHttpRequest
+const originalXHROpen = XMLHttpRequest.prototype.open;
+XMLHttpRequest.prototype.open = function (method, url) {
+    if (blockedUrls.some(blocked => url.includes(blocked))) {
+        console.log('Blocked request: ' + url);
+        return; // Block the request
     }
-    // hide by ExtendedCss
-    try {
-      GetExtendedCssStyleSheet.postMessage(document.location.href);
-    } catch (err) {
-      { { DEBUG } } console.log(`ExtendedCss rules failed '${css}' for ${document.location.href} by ${err}`);
-      throw err;
+    originalXHROpen.apply(this, arguments);
+};
+
+// Override fetch
+const originalFetch = window.fetch;
+window.fetch = function (input, init) {
+    const url = typeof input === 'string' ? input : input.url;
+    if (blockedUrls.some(blocked => url.includes(blocked))) {
+        console.log('Blocked fetch request: ' + url);
+        return Promise.reject(new Error('Blocked request: ' + url));
     }
-  },
-  function onExtendedCssStyleSheetReceived(css) {
-    { { DEBUG } } console.log(`ExtendedCss rules(length: ${css.length}) injecting for ${document.location.href}`);
-    if (css.length > 0) {
-      var extendedCss = new ExtendedCss({ styleSheet: css });
-      extendedCss.apply();
-    }
-    { { DEBUG } } console.log(`ExtendedCss rules success for ${document.location.href}`);
-    { { DEBUG } } console.log('element hiding finished');
-  };
-  
+    return originalFetch(input, init);
+};
+''';
+  return scriptWrapper.replaceFirst(contentPlaceholder, content);
+}
+
+String get elementHidingScript => '''
+document
+    .querySelectorAll('.ad, .ads, .adunitContainer, .adsBox, .ad-bottom-container, [class*="ad-unit"]')
+    .forEach(el => el.remove());
+''';

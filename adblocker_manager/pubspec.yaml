@@ -12,6 +12,7 @@ dependencies:
     path: ../adblocker_core
   flutter:
     sdk: flutter
+  path_provider: ^2.1.5
 
 dev_dependencies:
   build_runner: any
@@ -26,3 +27,4 @@ flutter:
   - assets/easy_privacy_lite.txt
   - assets/adguard_base.txt
   - assets/adguard_annyoance.txt
+  - assets/easylist.txt
