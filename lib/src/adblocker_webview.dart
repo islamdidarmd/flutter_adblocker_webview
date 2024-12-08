@@ -5,7 +5,6 @@ import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/css.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
-import 'package:adblocker_webview/src/js.dart';
 import 'package:adblocker_webview/src/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -70,37 +69,51 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   final _webViewKey = GlobalKey();
   final _filterManager = FilterManager.create();
   late final WebViewController _webViewController;
-  final blockedUrs = [];
-  String hidingSelectors = "";
+
+  late Future<void> _depsFuture;
 
   @override
   void initState() {
     super.initState();
-    _filterManager.init(AdBlockerFilterConfig(types: [FilterType.easyList]));
+    _depsFuture = _init();
+  }
 
+  Future<void> _init() async {
+    await _filterManager.init(AdBlockerFilterConfig(types: [
+      FilterType.adguardBase,
+      FilterType.adguardAnnyoance,
+      FilterType.easyPrivacyLite,
+    ]));
     _webViewController = WebViewController()
       ..setUserAgent(_getUserAgent())
       ..setJavaScriptMode(JavaScriptMode.unrestricted);
     _setNavigationDelegate();
-    //_setJavaScriptHandlers();
+    _setJavaScriptHandlers();
     widget.adBlockerWebviewController.setInternalController(_webViewController);
     _webViewController.loadRequest(widget.url);
   }
 
   @override
   Widget build(BuildContext context) {
-    return WebViewWidget(
-      key: _webViewKey,
-      controller: _webViewController,
+    return FutureBuilder(
+      future: _depsFuture,
+      builder: (_, state) {
+        if (state.connectionState == ConnectionState.done) {
+          return WebViewWidget(
+            key: _webViewKey,
+            controller: _webViewController,
+          );
+        }
+        return const SizedBox();
+      },
     );
   }
 
-  Future<void> _setNavigationDelegate() async {
-    await _webViewController.setNavigationDelegate(
+  void _setNavigationDelegate() {
+    _webViewController.setNavigationDelegate(
       NavigationDelegate(
         onPageStarted: (url) async {
-          _injectHidingScript();
-          _injectBlockingScript();
+          await _webViewController.runJavaScript(elementHidingJS);
           widget.onLoadStart?.call(url);
         },
         onPageFinished: (url) {
@@ -114,22 +127,9 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
         onUrlChange: (change) => widget.onUrlChanged?.call(change.url),
       ),
     );
-    //blockedUrs.addAll(await _filterManager.getBlockedUrls());
-    //hidingSelectors = await _filterManager.getElementHidingSelectors();
   }
 
-  /// Inject JavaScript to block certain network requests
-  void _injectBlockingScript() {
-    _webViewController.runJavaScript(resourceLoadingBlockerScript);
-  }
-
-  void _injectHidingScript() {
-    _webViewController.runJavaScript(elemHide);
-    _webViewController.runJavaScript(scriptLet);
-    //_webViewController.runJavaScript(elementHidingScript);
-  }
-
-  /*void _setJavaScriptHandlers() {
+  void _setJavaScriptHandlers() {
     _webViewController
       ..addJavaScriptChannel(
         'GetStyleSheet',
@@ -161,7 +161,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
           _webViewController.runJavaScript(sendScriptlesToJs(scriptles));
         },
       );
-    */ /* _controllerCompleter.future.then((controller) {
+    /* _controllerCompleter.future.then((controller) {
       controller
         ..addJavaScriptHandler(
           handlerName: 'getStyleSheet',
@@ -192,8 +192,8 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
             return "hello from flutter";
           },
         );
-    }); */ /*
-  }*/
+    }); */
+  }
 
   String _getUserAgent() {
     //todo: update user agent for each platform
