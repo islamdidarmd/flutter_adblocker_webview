@@ -5,6 +5,7 @@ import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/css.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
+import 'package:adblocker_webview/src/js.dart';
 import 'package:adblocker_webview/src/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -88,7 +89,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
       ..setUserAgent(_getUserAgent())
       ..setJavaScriptMode(JavaScriptMode.unrestricted);
     _setNavigationDelegate();
-    _setJavaScriptHandlers();
+    //_setJavaScriptHandlers();
     widget.adBlockerWebviewController.setInternalController(_webViewController);
     _webViewController.loadRequest(widget.url);
   }
@@ -113,7 +114,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     _webViewController.setNavigationDelegate(
       NavigationDelegate(
         onPageStarted: (url) async {
-          await _webViewController.runJavaScript(elementHidingJS);
+          _runJS(url);
           widget.onLoadStart?.call(url);
         },
         onPageFinished: (url) {
@@ -127,6 +128,15 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
         onUrlChange: (change) => widget.onUrlChanged?.call(change.url),
       ),
     );
+  }
+
+  void _runJS(String host) async {
+    final styleSheet = await _filterManager.getStyleSheet(host);
+    final es = await _filterManager.getExtendedCssStyleSheet(host);
+    final sc = await _filterManager.getScriptlets(host);
+    _webViewController.runJavaScript(getElemeHide(styleSheet, es));
+    _webViewController.runJavaScript(getScriptlet(sc));
+    _webViewController.runJavaScript(resourceLoadingBlockerScript);
   }
 
   void _setJavaScriptHandlers() {
