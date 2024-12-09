@@ -46,9 +46,10 @@ class _MyAppState extends State<MyApp> {
 
     await Future<void>.delayed(const Duration(seconds: 1));
     //final rulesCount = await _adblockerFilter.getRulesCount();
-    final rulesCount = await _adblockerFilter.getElementHidingSelector('https://www.prothomalo.com/');
+    //final rulesCount = await _adblockerFilter.getElementHidingSelector('https://www.prothomalo.com/');
+    final bannedHosts = _adblockerFilter.getMatchingRules();
     setState(() {
-      _rulesCount = rulesCount.toString();
+      _rulesCount = bannedHosts.join();
     });
     await _adblockerFilter.dispose();
   }

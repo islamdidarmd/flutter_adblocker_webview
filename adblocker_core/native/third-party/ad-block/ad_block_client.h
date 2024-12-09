@@ -144,6 +144,8 @@ public:
 
     static const int kFingerprintSize;
 
+    void getUrlsToBlock(char*** rules, size_t* count) const;
+
 protected:
     // Determines if a passed in array of filter pointers matches for any of
     // the input

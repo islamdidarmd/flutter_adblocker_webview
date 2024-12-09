@@ -9,6 +9,9 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <string>
+#include <vector>
+#include <algorithm>
 #include "./protocol.h"
 #include "./ad_block_client.h"
 #include "./bad_fingerprint.h"
@@ -2333,4 +2336,47 @@ uint64_t HashFn2Byte::operator()(const char *input, int len,
 
 uint64_t HashFn2Byte::operator()(const char *input, int len) {
   return (((uint64_t) input[1]) << 8) | input[0];
+}
+
+void AdBlockClient::getUrlsToBlock(char*** rules, size_t* count) const {
+    std::vector<const char*> blockUrls;
+    
+    // Get URLs from regular filters
+    for (int i = 0; i < numFilters; i++) {
+        Filter* filter = &filters[i];
+        if (filter && filter->data && !(filter->filterType & FTException)) {
+            blockUrls.push_back(filter->data);
+        }
+    }
+    
+    // Get URLs from host anchored filters
+    if (hostAnchoredHashSet) {
+        for (int i = 0; i < hostAnchoredHashSet->GetSize(); i++) {
+            Filter* filter = hostAnchoredHashSet->Find(Filter(nullptr, i));
+            if (filter && filter->host) {
+                // Convert host to URL pattern
+                std::string pattern = "||";
+                pattern += filter->host;
+                pattern += "^";
+                char* urlPattern = strdup(pattern.c_str());
+                blockUrls.push_back(urlPattern);
+            }
+        }
+    }
+    
+    // Get URLs from no fingerprint filters
+    for (int i = 0; i < numNoFingerprintFilters; i++) {
+        Filter* filter = &noFingerprintFilters[i];
+        if (filter && filter->data) {
+            blockUrls.push_back(filter->data);
+        }
+    }
+    
+    // Allocate and copy results
+    *count = blockUrls.size();
+    *rules = (char**)malloc(sizeof(char*) * blockUrls.size());
+    
+    for (size_t i = 0; i < blockUrls.size(); i++) {
+        (*rules)[i] = strdup(blockUrls[i]);
+    }
 }

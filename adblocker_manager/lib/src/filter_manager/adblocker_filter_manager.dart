@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:adblocker_core/adblocker_core.dart';
 import 'package:adblocker_manager/gen/assets.gen.dart';
@@ -7,7 +6,6 @@ import 'package:adblocker_manager/src/config/adblocker_filter_config.dart';
 import 'package:adblocker_manager/src/config/filter_type.dart';
 import 'package:adblocker_manager/src/filter_manager/filter_manager.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 
 class AdBlockerFilterManager implements FilterManager {
   AdBlockerFilterManager();
@@ -22,34 +20,58 @@ class AdBlockerFilterManager implements FilterManager {
   }
 
   @override
-  Future<bool> isAd(String url) async {
+  Future<void> isAd(String url, String host) async {
     for (final filter in _filters) {
-      if (await filter.isAd(url)) {
-        return true;
-      }
+      await filter.isAd(url, host, FilterOption.unknown);
     }
-
-    return false;
   }
 
   @override
-  Future<List<String>> getBlockedUrls() async {
-    final combined = <String>[];
-    for (final filter in _filters) {
-      combined.addAll(await filter.getBlockedUrls());
-    }
-    return combined;
-  }
-
-  @override
-  Future<String> getElementHidingSelectors() async {
+  Future<String> getStyleSheet(String host) async {
     final buffer = StringBuffer();
-    for (final filter in _filters) {
+    final selectors = await _getElementHidingSelector(host);
+    final rules = await _getCssRules(host);
+
+    if (selectors.isNotEmpty) {
       buffer
-        ..write(await filter.getElementHidingSelectors())
-        ..write(', ');
+        ..write(selectors)
+        ..write(hidingCss);
+    }
+    if (rules.isNotEmpty) {
+      buffer.writeAll(rules);
+    }
+    final seperated = _replaceEveryNth(buffer.toString(), ', ', hidingCss, 200);
+    return seperated;
+  }
+
+  @override
+  Future<String> getExtendedCssStyleSheet(String host) async {
+    final buffer = StringBuffer();
+    final selectors = await _getExtendedCssSelectors(host);
+    if (selectors.isNotEmpty) {
+      buffer
+        ..write(selectors.join(','))
+        ..write(hidingCss);
     }
     return buffer.toString();
+  }
+
+  @override
+  Future<List<String>> getScriptlets(String host) async {
+    final combinedScriptles = <String>[];
+    for (final filter in _filters) {
+      combinedScriptles.addAll(await filter.getScriptlets(host));
+    }
+    return combinedScriptles;
+  }
+
+  @override
+  Future<List<String>> getUrlsToBlock() async {
+    final combinedUrls = <String>[];
+    for (final filter in _filters) {
+      combinedUrls.addAll(await filter.getUrlsToBlock());
+    }
+    return combinedUrls;
   }
 
   @override
@@ -59,7 +81,7 @@ class AdBlockerFilterManager implements FilterManager {
     }
   }
 
-  /* Future<String> _getElementHidingSelector(String host) async {
+  Future<String> _getElementHidingSelector(String host) async {
     final buffer = StringBuffer();
     for (final filter in _filters) {
       buffer
@@ -98,7 +120,7 @@ class AdBlockerFilterManager implements FilterManager {
         return oldValue;
       }
     });
-  }*/
+  }
 
   Future<void> _createFilters(List<FilterType> types) async {
     for (final type in types) {
@@ -108,39 +130,24 @@ class AdBlockerFilterManager implements FilterManager {
   }
 
   Future<AdBlockerFilter> _filterfromType(FilterType type) async {
-    late ByteData rawData;
-    late String fileName;
+    late String rawData;
     const packagePrefix = 'packages/adblocker_manager/';
 
-    final dir = await getApplicationSupportDirectory();
-
     switch (type) {
-      case FilterType.easyList:
-        rawData = await rootBundle.load('$packagePrefix${Assets.easylist}');
-        fileName = 'easylist.txt';
       case FilterType.adguardBase:
-        rawData = await rootBundle.load('$packagePrefix${Assets.adguardBase}');
-        fileName = 'adguardBase.txt';
+        rawData =
+            await rootBundle.loadString('$packagePrefix${Assets.adguardBase}');
       case FilterType.adguardAnnyoance:
-        rawData =
-            await rootBundle.load('$packagePrefix${Assets.adguardAnnyoance}');
-        fileName = 'adguardAnnyoance.txt';
+        rawData = await rootBundle
+            .loadString('$packagePrefix${Assets.adguardAnnyoance}');
       case FilterType.easyPrivacyLite:
-        rawData =
-            await rootBundle.load('$packagePrefix${Assets.easyPrivacyLite}');
-        fileName = 'easyPrivacyLite.txt';
+        rawData = await rootBundle
+            .loadString('$packagePrefix${Assets.easyPrivacyLite}');
     }
-
-    final filePath = '${dir.path}/$fileName';
-    final file = File(filePath);
-    if (!file.existsSync()) {
-      file.createSync();
-    }
-    file.writeAsBytesSync(rawData.buffer.asUint8List());
 
     final filter = AdBlockerFilter();
     await filter.init();
-    await filter.processFile(filePath);
+    await filter.processRawData(rawData);
     return filter;
   }
 }

@@ -223,10 +223,10 @@ String get scriptWrapper => '''
 })();
 ''';
 
-String get resourceLoadingBlockerScript {
+String getResourceLoadingBlockerScript(List<String> urlsToBlock) {
   final content = '''
-    const blockedUrls = ['ads', 'tracking', 'doubleclick.net', 'googlesyndication.com'];
-
+    const blockedUrls = {{URLS}};
+console.log('blockedUrls: ' + blockedUrls); 
 // Override XMLHttpRequest
 const originalXHROpen = XMLHttpRequest.prototype.open;
 XMLHttpRequest.prototype.open = function (method, url) {
@@ -247,6 +247,6 @@ window.fetch = function (input, init) {
     }
     return originalFetch(input, init);
 };
-''';
+'''.replaceFirst("{{URLS}}", '[${urlsToBlock.join(', ')}]');
   return scriptWrapper.replaceFirst(contentPlaceholder, content);
 }

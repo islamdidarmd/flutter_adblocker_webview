@@ -134,9 +134,12 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     final styleSheet = await _filterManager.getStyleSheet(host);
     final es = await _filterManager.getExtendedCssStyleSheet(host);
     final sc = await _filterManager.getScriptlets(host);
+    final urlsToBlock = await _filterManager.getUrlsToBlock();
+
     _webViewController.runJavaScript(getElemeHide(styleSheet, es));
     _webViewController.runJavaScript(getScriptlet(sc));
-    _webViewController.runJavaScript(resourceLoadingBlockerScript);
+    _webViewController
+        .runJavaScript(getResourceLoadingBlockerScript(['ads', 'tracking', 'doubleclick.net', 'googlesyndication.com']));
   }
 
   void _setJavaScriptHandlers() {

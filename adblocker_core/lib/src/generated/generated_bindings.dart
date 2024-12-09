@@ -282,6 +282,35 @@ class AdBlockerCoreNative {
           'string_array_free');
   late final _string_array_free = _string_array_freePtr
       .asFunction<void Function(ffi.Pointer<StringArray>)>();
+
+  FilterRules adblocker_core_get_matching_rules(
+    ffi.Pointer<AdBlockerCore> core,
+  ) {
+    return _adblocker_core_get_matching_rules(
+      core,
+    );
+  }
+
+  late final _adblocker_core_get_matching_rulesPtr = _lookup<
+          ffi.NativeFunction<FilterRules Function(ffi.Pointer<AdBlockerCore>)>>(
+      'adblocker_core_get_matching_rules');
+  late final _adblocker_core_get_matching_rules =
+      _adblocker_core_get_matching_rulesPtr
+          .asFunction<FilterRules Function(ffi.Pointer<AdBlockerCore>)>();
+
+  void filter_rules_free(
+    ffi.Pointer<FilterRules> rules,
+  ) {
+    return _filter_rules_free(
+      rules,
+    );
+  }
+
+  late final _filter_rules_freePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<FilterRules>)>>(
+          'filter_rules_free');
+  late final _filter_rules_free = _filter_rules_freePtr
+      .asFunction<void Function(ffi.Pointer<FilterRules>)>();
 }
 
 final class __mbstate_t extends ffi.Union {
@@ -316,6 +345,19 @@ final class StringArray extends ffi.Struct {
   @ffi.Size()
   external int length;
 }
+
+final class FilterRules extends ffi.Struct {
+  external ffi.Pointer<ffi.Pointer<ffi.Char>> rules;
+
+  @ffi.Size()
+  external int count;
+}
+
+const int __bool_true_false_are_defined = 1;
+
+const int true1 = 1;
+
+const int false1 = 0;
 
 const int __has_safe_buffers = 1;
 
@@ -494,9 +536,3 @@ const int WINT_MAX = 2147483647;
 const int SIG_ATOMIC_MIN = -2147483648;
 
 const int SIG_ATOMIC_MAX = 2147483647;
-
-const int __bool_true_false_are_defined = 1;
-
-const int true1 = 1;
-
-const int false1 = 0;
