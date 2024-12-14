@@ -1,7 +1,7 @@
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 abstract class InternalWebviewController {
-  /// Sets inAppWebviewController to be used in future
+  /// Sets WebViewController to be used in future
   /// Typically not to be used by third parties
-  void setInternalController(InAppWebViewController controller);
+  void setInternalController(WebViewController controller);
 }

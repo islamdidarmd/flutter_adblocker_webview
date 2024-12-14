@@ -4,7 +4,7 @@ import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/data/repository/adblocker_repository_impl.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 ///Implementation for [AdBlockerWebviewController]
 class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
@@ -12,7 +12,7 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
       : _repository = repository ?? AdBlockerRepositoryImpl();
   final AdBlockerRepository _repository;
 
-  InAppWebViewController? _inAppWebViewController;
+  WebViewController? _webViewController;
 
   final _bannedHost = <Host>[];
 
@@ -29,96 +29,93 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
   }
 
   @override
-  void setInternalController(InAppWebViewController controller) {
-    _inAppWebViewController = controller;
+  void setInternalController(WebViewController controller) {
+    _webViewController = controller;
   }
 
   @override
   Future<bool> canGoBack() async {
-    if (_inAppWebViewController == null) {
+    if (_webViewController == null) {
       return false;
     }
 
-    return _inAppWebViewController!.canGoBack();
+    return _webViewController!.canGoBack();
   }
 
   @override
   Future<bool> canGoForward() async {
-    if (_inAppWebViewController == null) {
+    if (_webViewController == null) {
       return false;
     }
 
-    return _inAppWebViewController!.canGoForward();
+    return _webViewController!.canGoForward();
   }
 
   @override
   Future<void> clearCache() async {
-    if (_inAppWebViewController == null) {
+    if (_webViewController == null) {
       return;
     }
 
-    return _inAppWebViewController!.clearCache();
+    return _webViewController!.clearCache();
   }
 
   @override
   Future<String?> getTitle() async {
-    if (_inAppWebViewController == null) {
+    if (_webViewController == null) {
       return null;
     }
 
-    return _inAppWebViewController!.getTitle();
+    return _webViewController!.getTitle();
   }
 
   @override
   Future<void> goBack() async {
-    if (_inAppWebViewController == null) {
+    if (_webViewController == null) {
       return;
     }
 
-    return _inAppWebViewController!.goBack();
+    return _webViewController!.goBack();
   }
 
   @override
   Future<void> goForward() async {
-    if (_inAppWebViewController == null) {
+    if (_webViewController == null) {
       return;
     }
 
-    return _inAppWebViewController!.goForward();
+    return _webViewController!.goForward();
   }
 
   @override
   Future<void> loadUrl(String url) async {
-    if (_inAppWebViewController == null) {
+    if (_webViewController == null) {
       return;
     }
 
-    return _inAppWebViewController!
-        .loadUrl(urlRequest: URLRequest(url: WebUri(url)));
+    return _webViewController!.loadRequest(Uri.parse(url));
   }
 
   @override
   Future<void> loadData(
     String data, {
-    String mimeType = 'text/html',
-    String encoding = 'utf8',
+    String? baseUrl,
   }) async {
-    if (_inAppWebViewController == null) {
+    if (_webViewController == null) {
       return;
     }
-    return _inAppWebViewController!.loadData(
-      data: data,
-      mimeType: mimeType,
-      encoding: encoding,
+    return _webViewController!.loadHtmlString(
+      data,
+      baseUrl: baseUrl,
     );
   }
 
   @override
   Future<void> reload() async {
-    if (_inAppWebViewController == null) {
+    if (_webViewController == null) {
       return;
     }
 
-    return _inAppWebViewController!.reload();
+    return _webViewController!.reload();
   }
 }
