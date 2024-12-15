@@ -8,19 +8,17 @@ homepage: https://github.com/islamdidarmd/flutter_adblocker_webview
 environment:
   sdk: ^3.6.0
 
+workspace:
+  - packages/adblocker_core
+
 dependencies:
+  adblocker_core:
+    path: packages/adblocker_core
   flutter:
     sdk: flutter
 
   flutter_cache_manager: ^3.3.1
   webview_flutter: ^4.10.0
-
-dependency_overrides:
-  flutter_inappwebview_ios:
-    git:
-      url: https://github.com/pichillilorenzo/flutter_inappwebview.git
-      ref: 1f22137f01e3152d890551c094dd4928cc907fb5
-      path: flutter_inappwebview_ios
 
 dev_dependencies:
   flutter_test:
