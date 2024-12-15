@@ -59,19 +59,57 @@ String getResourceLoadingBlockerScript(List<String> urlsToBlock) {
 
   final content = '''
     const blockedUrls = [$jsyfied];
+    
     function isBlocked(url) {
-    return blockedUrls.some(blockedUrl => url.includes(blockedUrl));
-  }
-
-// Override XMLHttpRequest
-const originalXHROpen = XMLHttpRequest.prototype.open;
-XMLHttpRequest.prototype.open = function (method, url) {
-    if (isBlocked(url)) {
-        console.log('Blocked request: ' + url);
-        throw new Error('Request blocked: ' + url); // Throw error instead of silent return
+        return blockedUrls.some(blockedUrl => url.includes(blockedUrl));
     }
-    originalXHROpen.apply(this, arguments);
-};
+
+    // Override XMLHttpRequest
+    const originalXHROpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (method, url) {
+        if (isBlocked(url)) {
+            console.log('Blocked XHR request:', url);
+            throw new Error('XHR request blocked: ' + url);
+        }
+        originalXHROpen.apply(this, arguments);
+    };
+
+    // Override Fetch API
+    const originalFetch = window.fetch;
+    window.fetch = function (resource, init) {
+        const url = resource instanceof Request ? resource.url : resource;
+        
+        if (isBlocked(url)) {
+            console.log('Blocked fetch request:', url);
+            return Promise.reject(new Error('Fetch request blocked: ' + url));
+        }
+        
+        return originalFetch.apply(this, arguments);
+    };
+
+    // Block dynamic script loading
+    const originalCreateElement = document.createElement;
+    document.createElement = function (tagName) {
+        const element = originalCreateElement.apply(document, arguments);
+        
+        if (tagName.toLowerCase() === 'script') {
+            const originalSetter = Object.getOwnPropertyDescriptor(element, 'src').set;
+            
+            Object.defineProperty(element, 'src', {
+                set(url) {
+                    if (isBlocked(url)) {
+                        console.log('Blocked script loading:', url);
+                        throw new Error('Script loading blocked: ' + url);
+                    }
+                    originalSetter.call(this, url);
+                }
+            });
+        }
+        
+        return element;
+    };
+
+    console.log('Resource blocking script initialized');
 ''';
   return scriptWrapper.replaceFirst('{{CONTENT}}', content);
 }
@@ -85,13 +123,13 @@ String generateHidingScript(List<String> selectors) {
   return '''
 // Initialize selectors as a global variable
 window.adBlockerSelectors = $jsSelectorsArray;
+console.log('Initializing element hiding script with ' + window.adBlockerSelectors.length + ' selectors');
+
 (function () {
     // Function to hide matching elements
     function hideElements() {
         const cssSelectors = window.adBlockerSelectors;
         const BATCH_SIZE = 1000;
-
-        console.log('Initializing element hiding script with ' + cssSelectors.length + ' selectors');
 
         if (!Array.isArray(cssSelectors) || !cssSelectors.length) {
             console.warn('No valid selectors array found');
