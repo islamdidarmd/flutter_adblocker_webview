@@ -1,0 +1,13 @@
+name: adblocker_core
+description: "Core package for adblocker webview"
+version: 0.0.2
+homepage: "none"
+
+environment:
+  sdk: ^3.6.0
+resolution: workspace
+
+flutter:
+  assets:
+    - assets/adguard_base.txt
+    - assets/easylist.txt

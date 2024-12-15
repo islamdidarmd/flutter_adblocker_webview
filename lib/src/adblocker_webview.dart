@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:adblocker_core/adblocker_core.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
+import 'package:adblocker_webview/src/js.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -65,29 +68,70 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   final _webViewKey = GlobalKey();
   late final WebViewController _webViewController;
 
+  late Future<void> _depsFuture;
+  final List<String> _urlsToBlock = [];
+
+  final EasylistParser parser = EasylistParser();
+
   @override
   void initState() {
     super.initState();
-    _webViewController = WebViewController()
-      ..setUserAgent(_getUserAgent())
-      ..setJavaScriptMode(JavaScriptMode.unrestricted);
+    _depsFuture = _init();
+  }
+
+  Future<void> _init() async {
+    await parser.init();
+    _urlsToBlock
+      ..clear()
+      ..addAll(parser.rules.map((e) => e.filter));
+
+    _webViewController = WebViewController();
+    await _webViewController.setUserAgent(_getUserAgent());
+    await _webViewController.setJavaScriptMode(JavaScriptMode.unrestricted);
+
     _setNavigationDelegate();
     widget.adBlockerWebviewController.setInternalController(_webViewController);
-    _webViewController.loadRequest(widget.url);
+    unawaited(_webViewController.loadRequest(widget.url));
   }
 
   @override
   Widget build(BuildContext context) {
-    return WebViewWidget(
-      key: _webViewKey,
-      controller: _webViewController,
+    return FutureBuilder(
+      future: _depsFuture,
+      builder: (_, state) {
+        if (state.hasError) {
+          return Text('Error: ${state.error}');
+        } else if (state.connectionState == ConnectionState.done) {
+          return WebViewWidget(
+            key: _webViewKey,
+            controller: _webViewController,
+          );
+        } else if (state.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 45,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return const SizedBox();
+      },
     );
   }
 
   void _setNavigationDelegate() {
     _webViewController.setNavigationDelegate(
       NavigationDelegate(
-        onPageStarted: (url) {
+        onNavigationRequest: (request) {
+          if (_urlsToBlock.any((url) => request.url.contains(url))) {
+            print(
+                'onNavigationRequest: Blocked Main: ${request.isMainFrame} -> ${request.url}');
+            return NavigationDecision.prevent;
+          }
+          print(
+              'onNavigationRequest: Main: ${request.isMainFrame} -> ${request.url}');
+          return NavigationDecision.navigate;
+        },
+        onPageStarted: (url) async {
+          _runJS(url);
           widget.onLoadStart?.call(url);
         },
         onPageFinished: (url) {
@@ -103,7 +147,16 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     );
   }
 
+  //ignore: avoid_void_async, lines_longer_than_80_chars
+  void _runJS(String host) async {
+    final sc = parser.getCSSRulesForWebsite(host);
+    unawaited(_webViewController
+        .runJavaScript(getResourceLoadingBlockerScript(_urlsToBlock)));
+    unawaited(_webViewController.runJavaScript(generateHidingScript(sc)));
+  }
+
   String _getUserAgent() {
+    //todo: update user agent for each platform
     if (Platform.isAndroid) {
       return 'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 MyFlutterApp/1.0';
     } else if (Platform.isIOS) {
