@@ -68,20 +68,32 @@ String getResourceLoadingBlockerScript(List<String> urlsToBlock) {
     const originalXHROpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url) {
         if (isBlocked(url)) {
-            console.log('Blocked XHR request:', url);
-            throw new Error('XHR request blocked: ' + url);
+            // Silently fail by making a dummy XHR object that does nothing
+            console.log('Blocked XHR:', url);
+            return new Proxy(new XMLHttpRequest(), {
+                get: function(target, prop) {
+                    if (prop === 'send') {
+                        return function() {};
+                    }
+                    return target[prop];
+                }
+            });
         }
-        originalXHROpen.apply(this, arguments);
+        return originalXHROpen.apply(this, arguments);
     };
 
     // Override Fetch API
     const originalFetch = window.fetch;
     window.fetch = function (resource, init) {
         const url = resource instanceof Request ? resource.url : resource;
-        
+        console.log('Fetching:', url);
         if (isBlocked(url)) {
-            console.log('Blocked fetch request:', url);
-            return Promise.reject(new Error('Fetch request blocked: ' + url));
+            console.log('Blocked fetch:', url);
+            // Return empty response instead of rejecting
+              return Promise.resolve(new Response('', {
+                status: 200,
+                statusText: 'OK'
+            }));
         }
         
         return originalFetch.apply(this, arguments);
@@ -91,19 +103,16 @@ String getResourceLoadingBlockerScript(List<String> urlsToBlock) {
     const originalCreateElement = document.createElement;
     document.createElement = function (tagName) {
         const element = originalCreateElement.apply(document, arguments);
-        
+
         if (tagName.toLowerCase() === 'script') {
-            const originalSetter = Object.getOwnPropertyDescriptor(element, 'src').set;
-            
-            Object.defineProperty(element, 'src', {
-                set(url) {
-                    if (isBlocked(url)) {
-                        console.log('Blocked script loading:', url);
-                        throw new Error('Script loading blocked: ' + url);
-                    }
-                    originalSetter.call(this, url);
+            const originalSetAttribute = element.setAttribute;
+            element.setAttribute = function(name, value) {
+                if (name === 'src' && isBlocked(value)) {
+                    console.log('Blocked script:', value);
+                    return;
                 }
-            });
+                return originalSetAttribute.call(this, name, value);
+            };
         }
         
         return element;

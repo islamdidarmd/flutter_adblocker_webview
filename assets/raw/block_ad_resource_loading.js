@@ -9,7 +9,6 @@
     const originalXHROpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url) {
         if (isBlocked(url)) {
-            // Silently fail by making a dummy XHR object that does nothing
             return new Proxy(new XMLHttpRequest(), {
                 get: function(target, prop) {
                     if (prop === 'send') {
@@ -28,7 +27,6 @@
         const url = resource instanceof Request ? resource.url : resource;
         
         if (isBlocked(url)) {
-            // Return empty response instead of rejecting
             return Promise.resolve(new Response('', {
                 status: 200,
                 statusText: 'OK'
@@ -44,17 +42,13 @@
         const element = originalCreateElement.apply(document, arguments);
         
         if (tagName.toLowerCase() === 'script') {
-            const originalSetter = Object.getOwnPropertyDescriptor(element, 'src').set;
-            
-            Object.defineProperty(element, 'src', {
-                set(url) {
-                    if (isBlocked(url)) {
-                        // Silently ignore blocked scripts
-                        return;
-                    }
-                    originalSetter.call(this, url);
+            const originalSetAttribute = element.setAttribute;
+            element.setAttribute = function(name, value) {
+                if (name === 'src' && isBlocked(value)) {
+                    return;
                 }
-            });
+                return originalSetAttribute.call(this, name, value);
+            };
         }
         
         return element;
