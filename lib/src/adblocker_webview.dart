@@ -86,6 +86,11 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
       ..addAll(parser.rules.map((e) => e.filter));
 
     _webViewController = WebViewController();
+    await _webViewController.setOnConsoleMessage(
+      (message) {
+        print('[FLUTTER_WEBVIEW_LOG]: ${message.message}');
+      },
+    );
     await _webViewController.setUserAgent(_getUserAgent());
     await _webViewController.setJavaScriptMode(JavaScriptMode.unrestricted);
 
@@ -131,10 +136,13 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
           return NavigationDecision.navigate;
         },
         onPageStarted: (url) async {
-          _runJS(url);
           widget.onLoadStart?.call(url);
         },
         onPageFinished: (url) {
+          unawaited(_webViewController
+              .runJavaScript(getResourceLoadingBlockerScript(_urlsToBlock)));
+          final sc = parser.getCSSRulesForWebsite(url);
+          unawaited(_webViewController.runJavaScript(generateHidingScript(sc)));
           widget.onLoadFinished?.call(url);
         },
         onProgress: (progress) => widget.onProgress?.call(progress),
@@ -145,14 +153,6 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
         onUrlChange: (change) => widget.onUrlChanged?.call(change.url),
       ),
     );
-  }
-
-  //ignore: avoid_void_async, lines_longer_than_80_chars
-  void _runJS(String host) async {
-    final sc = parser.getCSSRulesForWebsite(host);
-    unawaited(_webViewController
-        .runJavaScript(getResourceLoadingBlockerScript(_urlsToBlock)));
-    unawaited(_webViewController.runJavaScript(generateHidingScript(sc)));
   }
 
   String _getUserAgent() {
