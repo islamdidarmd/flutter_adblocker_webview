@@ -145,8 +145,13 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
         onPageFinished: (url) {
           unawaited(_webViewController
               .runJavaScript(getResourceLoadingBlockerScript(_urlsToBlock)));
-          final sc = parser.getCSSRulesForWebsite(url);
-          unawaited(_webViewController.runJavaScript(generateHidingScript(sc)));
+
+          // Extract domain from full URL
+          final domain = Uri.parse(url).host;
+          final cssRules = parser.getCSSRulesForWebsite(domain);
+          unawaited(
+              _webViewController.runJavaScript(generateHidingScript(cssRules)));
+
           widget.onLoadFinished?.call(url);
         },
         onProgress: (progress) => widget.onProgress?.call(progress),
