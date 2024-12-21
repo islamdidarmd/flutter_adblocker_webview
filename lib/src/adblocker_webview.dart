@@ -69,7 +69,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   late final WebViewController _webViewController;
 
   late Future<void> _depsFuture;
-  final List<String> _urlsToBlock = [];
+  final List<BlockRule> _urlsToBlock = [];
 
   final EasylistParser parser = EasylistParser();
 
@@ -83,7 +83,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     await parser.init();
     _urlsToBlock
       ..clear()
-      ..addAll(parser.rules.map((e) => e.filter));
+      ..addAll(parser.getBlockRules());
 
     _webViewController = WebViewController();
     await _webViewController.setOnConsoleMessage(
@@ -126,13 +126,17 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     _webViewController.setNavigationDelegate(
       NavigationDelegate(
         onNavigationRequest: (request) {
-          if (_urlsToBlock.any((url) => request.url.contains(url))) {
-            print(
-                'onNavigationRequest: Blocked Main: ${request.isMainFrame} -> ${request.url}');
+          final isThirdParty = Uri.parse(request.url).host != widget.url.host;
+          final shouldBlock = _urlsToBlock.any((rule) =>
+              rule.filter.contains(request.url) &&
+              (rule.resourceType == ResourceType.any ||
+                  rule.resourceType == ResourceType.script) &&
+              (!rule.isThirdParty || isThirdParty) &&
+              rule.matchesDomain(widget.url.host));
+
+          if (shouldBlock) {
             return NavigationDecision.prevent;
           }
-          print(
-              'onNavigationRequest: Main: ${request.isMainFrame} -> ${request.url}');
           return NavigationDecision.navigate;
         },
         onPageStarted: (url) async {

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:adblocker_core/adblocker_core.dart';
+
 String get scriptWrapper => '''
 (function () {
     // Listening for the appearance of the body element to execute the script as soon as possible before the `interactive` event.
@@ -54,27 +56,73 @@ String get scriptWrapper => '''
 })();
 ''';
 
-String getResourceLoadingBlockerScript(List<String> urlsToBlock) {
-  final jsyfied = urlsToBlock.map((s) => "'$s'").join(", ");
+String getResourceLoadingBlockerScript(List<BlockRule> rules) {
+  // Convert BlockRules to JavaScript objects
+  final jsRules = rules
+      .map((rule) => '''
+    {
+      filter: '${rule.filter}',
+      resourceType: '${rule.resourceType.name}',
+      isThirdParty: ${rule.isThirdParty},
+      ${rule.domains == null ? '' : '''
+      domains: {
+        include: [${rule.domains!.includeDomains.map((d) => "'$d'").join(', ')}],
+        exclude: [${rule.domains!.excludeDomains.map((d) => "'$d'").join(', ')}]
+      },
+      '''}
+    }
+  ''')
+      .join(',\n');
 
   final content = '''
-    const blockedUrls = [$jsyfied];
+    window.adBlockerRules = [$jsRules];
     
-    function isBlocked(url) {
-        return blockedUrls.some(blockedUrl => url.includes(blockedUrl));
+    const rules = window.adBlockerRules || [];
+    
+    function isBlocked(url, type, isThirdParty) {
+        const blockedRule = rules.find(rule => {
+            if (!url.includes(rule.filter)) return false;
+            if (rule.resourceType !== 'any' && rule.resourceType !== type) return false;
+            if (rule.isThirdParty && !isThirdParty) return false;
+            
+            if (rule.domains) {
+                const currentDomain = window.location.hostname;
+                if (rule.domains.exclude.some(d => currentDomain.endsWith(d))) return false;
+                if (rule.domains.include.length && !rule.domains.include.some(d => currentDomain.endsWith(d))) return false;
+            }
+            return true;
+        });
+
+        if (blockedRule) {
+            console.log(`[BLOCKED \${type}] \${url}`, {
+                rule: blockedRule.filter,
+                type: blockedRule.resourceType,
+                isThirdParty,
+                currentDomain: window.location.hostname
+            });
+            return true;
+        }
+        return false;
     }
 
-    // Override XMLHttpRequest
+    // Rest of the blocking script...
+    ${_getBlockingScript()}
+
+    console.log('[AdBlocker] Initialized with', rules.length, 'rules');
+  ''';
+
+  return scriptWrapper.replaceFirst('{{CONTENT}}', content);
+}
+
+String _getBlockingScript() => '''
     const originalXHROpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url) {
-        if (isBlocked(url)) {
-            // Silently fail by making a dummy XHR object that does nothing
-            console.log('Blocked XHR:', url);
+        const isThirdParty = new URL(url, window.location.href).hostname !== window.location.hostname;
+        
+        if (isBlocked(url, 'xhr', isThirdParty)) {
             return new Proxy(new XMLHttpRequest(), {
                 get: function(target, prop) {
-                    if (prop === 'send') {
-                        return function() {};
-                    }
+                    if (prop === 'send') return function() {};
                     return target[prop];
                 }
             });
@@ -82,15 +130,13 @@ String getResourceLoadingBlockerScript(List<String> urlsToBlock) {
         return originalXHROpen.apply(this, arguments);
     };
 
-    // Override Fetch API
     const originalFetch = window.fetch;
     window.fetch = function (resource, init) {
         const url = resource instanceof Request ? resource.url : resource;
-        console.log('Fetching:', url);
-        if (isBlocked(url)) {
-            console.log('Blocked fetch:', url);
-            // Return empty response instead of rejecting
-              return Promise.resolve(new Response('', {
+        const isThirdParty = new URL(url, window.location.href).hostname !== window.location.hostname;
+        
+        if (isBlocked(url, 'xhr', isThirdParty)) {
+            return Promise.resolve(new Response('', {
                 status: 200,
                 statusText: 'OK'
             }));
@@ -99,17 +145,18 @@ String getResourceLoadingBlockerScript(List<String> urlsToBlock) {
         return originalFetch.apply(this, arguments);
     };
 
-    // Block dynamic script loading
     const originalCreateElement = document.createElement;
     document.createElement = function (tagName) {
         const element = originalCreateElement.apply(document, arguments);
-
+        
         if (tagName.toLowerCase() === 'script') {
             const originalSetAttribute = element.setAttribute;
             element.setAttribute = function(name, value) {
-                if (name === 'src' && isBlocked(value)) {
-                    console.log('Blocked script:', value);
-                    return;
+                if (name === 'src') {
+                    const isThirdParty = new URL(value, window.location.href).hostname !== window.location.hostname;
+                    if (isBlocked(value, 'script', isThirdParty)) {
+                        return;
+                    }
                 }
                 return originalSetAttribute.call(this, name, value);
             };
@@ -117,11 +164,7 @@ String getResourceLoadingBlockerScript(List<String> urlsToBlock) {
         
         return element;
     };
-
-    console.log('Resource blocking script initialized');
 ''';
-  return scriptWrapper.replaceFirst('{{CONTENT}}', content);
-}
 
 // Generate the JavaScript code dynamically
 String generateHidingScript(List<String> selectors) {
