@@ -149,14 +149,19 @@ class EasylistParser {
     }
   }
 
+  bool _domainMatches(String ruleDomain, String targetDomain) {
+    if (ruleDomain.isEmpty) return true;
+    return targetDomain == ruleDomain || targetDomain.endsWith('.$ruleDomain');
+  }
+
   List<String> getCSSRulesForWebsite(String domain) {
     final applicableRules = cssRules
-        .where((rule) => rule.domain.isEmpty || rule.domain == domain)
+        .where((rule) => _domainMatches(rule.domain, domain))
         .expand((rule) => rule.selectors)
         .toList();
 
     final exceptions = cssExceptionRules
-        .where((rule) => rule.domain.isEmpty || rule.domain == domain)
+        .where((rule) => _domainMatches(rule.domain, domain))
         .expand((rule) => rule.selectors)
         .toSet();
 
@@ -169,16 +174,6 @@ class EasylistParser {
     return _urlsToBlock
         .where((rule) => !_exceptionUrls
             .any((exRule) => rule.filter.contains(exRule.filter)))
-        .toList();
-  }
-
-  @Deprecated('Use getBlockRules() instead')
-  List<String> getUrlsToBlock() {
-    final allowedPatterns = _exceptionUrls.map((rule) => rule.filter).toSet();
-    return _urlsToBlock
-        .where((rule) =>
-            !allowedPatterns.any((pattern) => rule.filter.contains(pattern)))
-        .map((rule) => rule.filter)
         .toList();
   }
 }

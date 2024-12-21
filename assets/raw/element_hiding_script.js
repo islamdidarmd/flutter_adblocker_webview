@@ -1,80 +1,90 @@
 (function () {
-    // Function to hide matching elements
+    const selectors = window.adBlockerSelectors || [];
+    const BATCH_SIZE = 1000;
+    let hiddenElements = 0;
+
     function hideElements() {
-        const cssSelectors = window.adBlockerSelectors;
-        const BATCH_SIZE = 1000;
-
-        console.log('Initializing element hiding script with ' + cssSelectors.length + ' selectors');
-
-        if (!Array.isArray(cssSelectors) || !cssSelectors.length) {
-            console.warn('No valid selectors array found');
+        if (!Array.isArray(selectors) || !selectors.length) {
+            console.warn('[AdBlocker] No valid selectors found');
             return;
         }
 
         try {
-            const batchCount = Math.ceil(cssSelectors.length / BATCH_SIZE);
+            const batchCount = Math.ceil(selectors.length / BATCH_SIZE);
+            console.log(`[AdBlocker] Processing ${selectors.length} selectors in ${batchCount} batches`);
 
             for (let i = 0; i < batchCount; i++) {
                 const start = i * BATCH_SIZE;
-                const end = Math.min(start + BATCH_SIZE, cssSelectors.length);
-                const selectors = cssSelectors.slice(start, end);
-
-                if (!Array.isArray(selectors) || !selectors.length) {
-                    console.warn('Invalid selectors batch');
-                    continue;
-                }
+                const end = Math.min(start + BATCH_SIZE, selectors.length);
+                const batchSelectors = selectors.slice(start, end);
 
                 try {
-                    // Ensure all items in selectors are strings
-                    const validSelectors = selectors.filter(selector =>
-                        typeof selector === 'string' && selector.trim().length > 0
-                    );
+                    // Create one combined selector for better performance
+                    const combinedSelector = batchSelectors
+                        .filter(selector => typeof selector === 'string' && selector.trim())
+                        .join(', ');
 
-                    if (!validSelectors.length) {
-                        console.warn('No valid selectors in batch');
+                    if (!combinedSelector) {
+                        console.warn(`[AdBlocker] Batch ${i + 1}: No valid selectors`);
                         continue;
                     }
 
-                    const selector = validSelectors.join(', ');
-                    const elements = document.querySelectorAll(selector);
+                    // Query all elements at once
+                    const elements = document.querySelectorAll(combinedSelector);
                     elements.forEach(el => {
                         try {
+                            const selector = batchSelectors.find(s => el.matches(s));
+                            console.log(`[AdBlocker] Hiding element:`, {
+                                selector,
+                                tagName: el.tagName,
+                                id: el.id,
+                                classes: Array.from(el.classList)
+                            });
                             el.remove();
+                            hiddenElements++;
                         } catch (elementError) {
-                            console.warn('Failed to remove element:', elementError);
+                            console.warn('[AdBlocker] Failed to remove element:', elementError);
                         }
                     });
-                } catch (selectorError) {
-                    console.warn('Invalid selector in batch:', selectorError);
-                    continue;
+
+                    console.log(`[AdBlocker] Batch ${i + 1}/${batchCount}: Processed ${elements.length} elements`);
+                } catch (batchError) {
+                    console.warn(`[AdBlocker] Error in batch ${i + 1}:`, batchError);
                 }
             }
-            console.log('Processed batch ' + batchCount);
+
+            console.log(`[AdBlocker] Hiding completed: ${hiddenElements} elements hidden`);
         } catch (error) {
-            console.error('Error in hideElements:', error);
+            console.error('[AdBlocker] Error in hideElements:', error);
         }
     }
 
-    // Observe DOM changes to handle dynamically added elements
+    // Create a MutationObserver instance
     const observer = new MutationObserver((mutations) => {
-        if (mutations.some(mutation => mutation.addedNodes.length > 0)) {
+        let shouldHide = false;
+        for (const mutation of mutations) {
+            if (mutation.addedNodes.length) {
+                shouldHide = true;
+                break;
+            }
+        }
+        if (shouldHide) {
+            console.log('[AdBlocker] DOM changed, re-running element hiding');
             hideElements();
         }
     });
 
-    // Start observing the DOM with error handling
+    // Start observing with error handling
     try {
         observer.observe(document.body, {
             childList: true,
             subtree: true
         });
-        console.log('MutationObserver successfully initialized');
+        console.log('[AdBlocker] MutationObserver initialized');
     } catch (error) {
-        console.error('Failed to initialize MutationObserver:', error);
+        console.error('[AdBlocker] Failed to initialize MutationObserver:', error);
     }
 
-    // Initial hide on page load
+    // Initial hide
     hideElements();
-
-    console.log('Element hiding script initialized successfully');
 })();
