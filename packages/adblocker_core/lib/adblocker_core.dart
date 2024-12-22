@@ -1,18 +1,19 @@
+import 'package:adblocker_core/css_rules_parser.dart';
 import 'package:flutter/services.dart';
 
 // Regular expressions for different filter types
 final blockRulePattern =
     RegExp(r'\|\|([^$]+)\^?\$?(.*)'); // Block rules with options
-final cssRulePattern =
-    RegExp(r'^([^#]*)(##|#@#|#\?#)(.+)$'); // CSS hiding rules
 final commentPattern = RegExp(r'^\s*!.*'); // Comments
 final optionsPattern = RegExp(r'\$(.+)$'); // Filter options
 
 class EasylistParser {
   final List<BlockRule> _urlsToBlock = [];
   final List<BlockRule> _exceptionUrls = [];
-  final List<CSSRule> cssRules = [];
-  final List<CSSRule> cssExceptionRules = [];
+  final List<CSSRule> _cssRules = [];
+  final List<CSSRule> _cssExceptionRules = [];
+
+  final CSSRulesParser _cssRulesParser = CSSRulesParser();
 
   Future<void> init() async {
     final str = await rootBundle
@@ -29,16 +30,14 @@ class EasylistParser {
       // Skip empty lines and comments
       if (line.isEmpty || line.startsWith('!')) continue;
 
+      // Handle element hiding rules
+      final isCSSRule = _parseCSSRule(line);
+      if (isCSSRule) continue;
+
       // Handle exception rules
       final isException = line.startsWith('@@');
       if (isException) {
         line = line.substring(2); // Remove '@@'
-      }
-
-      // Handle element hiding rules
-      if (line.contains('##') || line.contains('#@#') || line.contains('#?#')) {
-        _parseCSSRule(line, isException);
-        continue;
       }
 
       // Handle blocking rules
@@ -55,25 +54,16 @@ class EasylistParser {
     }
   }
 
-  void _parseCSSRule(String line, bool isException) {
-    final match = cssRulePattern.firstMatch(line);
-    if (match == null) return;
+  bool _parseCSSRule(String line) {
+    final rule = _cssRulesParser.parseLine(line);
+    if (rule == null) return false;
 
-    final domain = match.group(1) ?? '';
-    final separator = match.group(2) ?? '##';
-    final selectors = match.group(3)?.split(',') ?? [];
-
-    final rule = CSSRule(
-      domain: domain,
-      selectors: selectors,
-      isExtendedSelector: separator == '#?#',
-    );
-
-    if (isException || separator == '#@#') {
-      cssExceptionRules.add(rule);
+    if (rule.isException) {
+      _cssExceptionRules.add(rule);
     } else {
-      cssRules.add(rule);
+      _cssRules.add(rule);
     }
+    return true;
   }
 
   void _parseBlockingRule(String line, bool isException) {
@@ -150,24 +140,29 @@ class EasylistParser {
   }
 
   bool _domainMatches(String ruleDomain, String targetDomain) {
-    if (ruleDomain.isEmpty) return true;
-    return targetDomain == ruleDomain || targetDomain.endsWith('.$ruleDomain');
+    return targetDomain == ruleDomain || targetDomain.contains(ruleDomain);
   }
 
-  List<String> getCSSRulesForWebsite(String domain) {
-    final applicableRules = cssRules
-        .where((rule) => _domainMatches(rule.domain, domain))
-        .expand((rule) => rule.selectors)
+  List<String> getAllCSSRules() {
+    return _cssRules.map((rule) => rule.selector).toList();
+  }
+
+  List<String> getCSSRulesForWebsite(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return [];
+    final domain = uri.host;
+
+    final applicableRules = _cssRules
+        .where((rule) => !rule.isException)
+        .where(
+          (rule) =>
+              rule.domain.isEmpty ||
+              rule.domain.any((d) => _domainMatches(d, domain)),
+        )
+        .map((rule) => rule.selector)
         .toList();
 
-    final exceptions = cssExceptionRules
-        .where((rule) => _domainMatches(rule.domain, domain))
-        .expand((rule) => rule.selectors)
-        .toSet();
-
-    return applicableRules
-        .where((selector) => !exceptions.contains(selector))
-        .toList();
+    return applicableRules;
   }
 
   List<BlockRule> getBlockRules() {
@@ -223,16 +218,4 @@ enum ResourceType {
   xhr,
   subdocument,
   websocket,
-}
-
-class CSSRule {
-  final String domain;
-  final List<String> selectors;
-  final bool isExtendedSelector;
-
-  CSSRule({
-    required this.domain,
-    required this.selectors,
-    this.isExtendedSelector = false,
-  });
 }
