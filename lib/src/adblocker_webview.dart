@@ -143,8 +143,8 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
           widget.onLoadStart?.call(url);
         },
         onPageFinished: (url) {
-          unawaited(_webViewController
-              .runJavaScript(getResourceLoadingBlockerScript(_urlsToBlock)));
+            unawaited(_webViewController
+                .runJavaScript(getResourceLoadingBlockerScript(_urlsToBlock)));
 
           // Extract domain from full URL
           final domain = Uri.parse(url).host;
@@ -165,13 +165,14 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   }
 
   String _getUserAgent() {
-    //todo: update user agent for each platform
+    final osVersion = Platform.operatingSystemVersion;
+
     if (Platform.isAndroid) {
-      return 'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 MyFlutterApp/1.0';
+      return 'Mozilla/5.0 (Linux; Android $osVersion) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 MyFlutterApp/1.0';
     } else if (Platform.isIOS) {
-      return 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1 MyFlutterApp/1.0';
+      return 'Mozilla/5.0 (iPhone; CPU iPhone OS $osVersion like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1 MyFlutterApp/1.0';
     } else {
-      return 'Mozilla/5.0 (platform; vendor; version) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 MyFlutterApp/1.0';
+      return 'Mozilla/5.0 ($osVersion; vendor; version) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 MyFlutterApp/1.0';
     }
   }
 }
