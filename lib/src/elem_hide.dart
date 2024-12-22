@@ -1,3 +1,9 @@
+import 'dart:convert';
+
+String generateHidingScript(List<String> selectors) {
+  final jsSelectorsArray = jsonEncode(selectors);
+  return '''
+    window.adBlockerSelectors = $jsSelectorsArray;
 (function () {
     const selectors = window.adBlockerSelectors || [];
     const BATCH_SIZE = 1000;
@@ -41,3 +47,5 @@
         console.error('[AdBlocker] Observer error:', error);
     }
 })();
+  ''';
+}
