@@ -7,7 +7,7 @@ void main() {
   test('Verify css rules are parsed correctly', () async {
     final adblocker = EasylistParser();
     await adblocker.init();
-    final rules = adblocker.getCSSRulesForWebsite('https://w3newspapers.com');
+    final rules = adblocker.getCSSRulesForWebsite('https://dez.ro');
     final str = rules.join(', ');
     expect(rules.length, greaterThan(0));
   });

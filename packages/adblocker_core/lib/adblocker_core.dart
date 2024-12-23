@@ -11,7 +11,6 @@ class EasylistParser {
   final List<BlockRule> _urlsToBlock = [];
   final List<BlockRule> _exceptionUrls = [];
   final List<CSSRule> _cssRules = [];
-  final List<CSSRule> _cssExceptionRules = [];
 
   final CSSRulesParser _cssRulesParser = CSSRulesParser();
 
@@ -57,12 +56,7 @@ class EasylistParser {
   bool _parseCSSRule(String line) {
     final rule = _cssRulesParser.parseLine(line);
     if (rule == null) return false;
-
-    if (rule.isException) {
-      _cssExceptionRules.add(rule);
-    } else {
-      _cssRules.add(rule);
-    }
+    _cssRules.add(rule);
     return true;
   }
 
@@ -143,24 +137,27 @@ class EasylistParser {
     return targetDomain == ruleDomain || targetDomain.contains(ruleDomain);
   }
 
-  List<String> getAllCSSRules() {
-    return _cssRules.map((rule) => rule.selector).toList();
-  }
-
   List<String> getCSSRulesForWebsite(String url) {
     final uri = Uri.tryParse(url);
     if (uri == null) return [];
     final domain = uri.host;
+    final applicableRules = <String>[];
+    final applicableExceptionRules = <String, bool>{};
 
-    final applicableRules = _cssRules
-        .where((rule) => !rule.isException)
-        .where(
-          (rule) =>
-              rule.domain.isEmpty ||
-              rule.domain.any((d) => _domainMatches(d, domain)),
-        )
-        .map((rule) => rule.selector)
-        .toList();
+    for (final rule in _cssRules) {
+      if (applicableExceptionRules.containsKey(rule.selector)) continue;
+
+      if (rule.domain.isEmpty ||
+          rule.domain.any((d) => _domainMatches(d, domain))) {
+        if (rule.isException) {
+          applicableExceptionRules[rule.selector] = true;
+        } else {
+          applicableRules.add(rule.selector);
+        }
+      }
+    }
+
+    applicableExceptionRules.keys.forEach(applicableRules.remove);
 
     return applicableRules;
   }
