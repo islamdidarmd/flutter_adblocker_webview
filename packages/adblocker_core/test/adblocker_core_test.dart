@@ -15,7 +15,7 @@ void main() {
   test('Verify resource rules are parsed correctly', () async {
     final adblocker = EasylistParser();
     await adblocker.init();
-    final rules = adblocker.getResourceRules();
+    final rules = adblocker.getAllResourceRules();
     final str = rules.map((e) => e.url).join(', ');
     expect(rules.length, greaterThan(0));
   });
