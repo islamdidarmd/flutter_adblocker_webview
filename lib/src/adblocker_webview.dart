@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:adblocker_core/adblocker_core.dart';
+import 'package:adblocker_core/resource_rules_parser.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:adblocker_webview/src/elem_hide.dart';
 import 'package:adblocker_webview/src/js.dart';
+import 'package:adblocker_webview/src/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -70,7 +72,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   late final WebViewController _webViewController;
 
   late Future<void> _depsFuture;
-  final List<BlockRule> _urlsToBlock = [];
+  final List<ResourceRule> _urlsToBlock = [];
 
   final EasylistParser parser = EasylistParser();
 
@@ -84,7 +86,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     await parser.init();
     _urlsToBlock
       ..clear()
-      ..addAll(parser.getBlockRules());
+      ..addAll(parser.getAllResourceRules());
 
     _webViewController = WebViewController();
     await _webViewController.setOnConsoleMessage(
@@ -127,24 +129,18 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     _webViewController.setNavigationDelegate(
       NavigationDelegate(
         onNavigationRequest: (request) {
-          /* final isThirdParty = Uri.parse(request.url).host != widget.url.host;
-          final shouldBlock = _urlsToBlock.any((rule) =>
-              rule.filter.contains(request.url) &&
-              (rule.resourceType == ResourceType.any ||
-                  rule.resourceType == ResourceType.script) &&
-              (!rule.isThirdParty || isThirdParty) &&
-              rule.matchesDomain(widget.url.host));
-
+          final shouldBlock = parser.shouldBlockResource(request.url);
           if (shouldBlock) {
+            debugLog('Blocking resource: ${request.url}');
             return NavigationDecision.prevent;
-          } */
+          }
           return NavigationDecision.navigate;
         },
         onPageStarted: (url) async {
           widget.onLoadStart?.call(url);
         },
         onPageFinished: (url) {
-            /* unawaited(_webViewController
+          /* unawaited(_webViewController
                 .runJavaScript(getResourceLoadingBlockerScript(_urlsToBlock))); */
 
           // Extract domain from full URL

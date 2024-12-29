@@ -56,7 +56,8 @@ String get scriptWrapper => '''
 })();
 ''';
 
-String getResourceLoadingBlockerScript(List<BlockRule> rules) {
+
+/* String getResourceLoadingBlockerScript(List<BlockRule> rules) {
   // Convert BlockRules to JavaScript objects
   final jsRules = rules
       .map((rule) => '''
@@ -113,8 +114,7 @@ String getResourceLoadingBlockerScript(List<BlockRule> rules) {
 
   return scriptWrapper.replaceFirst('{{CONTENT}}', content);
 }
-
-String _getBlockingScript() => '''
+ String _getBlockingScript() => '''
     const originalXHROpen = XMLHttpRequest.prototype.open;
     XMLHttpRequest.prototype.open = function (method, url) {
         const isThirdParty = new URL(url, window.location.href).hostname !== window.location.hostname;
@@ -165,4 +165,5 @@ String _getBlockingScript() => '''
         return element;
     };
 ''';
+*/
 

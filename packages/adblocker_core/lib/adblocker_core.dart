@@ -81,7 +81,7 @@ class EasylistParser {
 
     applicableExceptionRules.keys.forEach(applicableRules.remove);
 
-    return applicableRules;
+    return applicableRules..add('.ads')..add('#anchor-container');
   }
 
   List<ResourceRule> getAllResourceRules() {
