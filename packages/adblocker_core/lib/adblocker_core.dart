@@ -1,18 +1,17 @@
 import 'package:adblocker_core/css_rules_parser.dart';
+import 'package:adblocker_core/resource_rules_parser.dart';
 import 'package:flutter/services.dart';
 
-// Regular expressions for different filter types
-final blockRulePattern =
-    RegExp(r'\|\|([^$]+)\^?\$?(.*)'); // Block rules with options
+// Regular expressions for different filter types // Block rules with options
 final commentPattern = RegExp(r'^\s*!.*'); // Comments
 final optionsPattern = RegExp(r'\$(.+)$'); // Filter options
 
 class EasylistParser {
-  final List<BlockRule> _urlsToBlock = [];
-  final List<BlockRule> _exceptionUrls = [];
   final List<CSSRule> _cssRules = [];
-
-  final CSSRulesParser _cssRulesParser = CSSRulesParser();
+  final List<ResourceRule> _resourceRules = [];
+  final List<ResourceRule> _resourceExceptionRules = [];
+  final _cssRulesParser = CSSRulesParser();
+  final _resourceRulesParser = ResourceRulesParser();
 
   Future<void> init() async {
     final str = await rootBundle
@@ -30,26 +29,11 @@ class EasylistParser {
       if (line.isEmpty || line.startsWith('!')) continue;
 
       // Handle element hiding rules
-      final isCSSRule = _parseCSSRule(line);
-      if (isCSSRule) continue;
+      final isCSSParsed = _parseCSSRule(line);
+      if (isCSSParsed) continue;
 
-      // Handle exception rules
-      final isException = line.startsWith('@@');
-      if (isException) {
-        line = line.substring(2); // Remove '@@'
-      }
-
-      // Handle blocking rules
-      if (line.startsWith('||')) {
-        _parseBlockingRule(line, isException);
-        continue;
-      }
-
-      // Handle domain anchor rules
-      if (line.startsWith('|')) {
-        _parseDomainAnchorRule(line, isException);
-        continue;
-      }
+      final isResourceParsed = _parseResourceRule(line);
+      if (isResourceParsed) continue;
     }
   }
 
@@ -60,77 +44,15 @@ class EasylistParser {
     return true;
   }
 
-  void _parseBlockingRule(String line, bool isException) {
-    final match = blockRulePattern.firstMatch(line);
-    if (match == null) return;
-
-    var filter = match.group(1) ?? '';
-    final optionsStr = match.group(2) ?? '';
-
-    // Remove trailing separator
-    if (filter.endsWith('^')) {
-      filter = filter.substring(0, filter.length - 1);
-    }
-
-    final rule = BlockRule(
-      filter: filter,
-      isException: isException,
-      isThirdParty: optionsStr.contains('third-party'),
-      resourceType: _parseResourceType(optionsStr),
-      domains: _parseDomains(optionsStr),
-    );
-
-    if (isException) {
-      _exceptionUrls.add(rule);
+  bool _parseResourceRule(String line) {
+    final rule = _resourceRulesParser.parseLine(line);
+    if (rule == null) return false;
+    if (rule.isException) {
+      _resourceExceptionRules.add(rule);
     } else {
-      _urlsToBlock.add(rule);
+      _resourceRules.add(rule);
     }
-  }
-
-  ResourceType _parseResourceType(String options) {
-    if (options.contains('script')) return ResourceType.script;
-    if (options.contains('image')) return ResourceType.image;
-    if (options.contains('stylesheet')) return ResourceType.stylesheet;
-    if (options.contains('xmlhttprequest')) return ResourceType.xhr;
-    if (options.contains('subdocument')) return ResourceType.subdocument;
-    if (options.contains('websocket')) return ResourceType.websocket;
-    return ResourceType.any;
-  }
-
-  DomainOptions? _parseDomains(String options) {
-    final domainMatch = RegExp(r'domain=([^,]+)').firstMatch(options);
-    if (domainMatch == null) return null;
-
-    final domains = domainMatch.group(1)!.split('|');
-    final includeDomains = <String>[];
-    final excludeDomains = <String>[];
-
-    for (final domain in domains) {
-      if (domain.startsWith('~')) {
-        excludeDomains.add(domain.substring(1));
-      } else {
-        includeDomains.add(domain);
-      }
-    }
-
-    return DomainOptions(
-      includeDomains: includeDomains,
-      excludeDomains: excludeDomains,
-    );
-  }
-
-  void _parseDomainAnchorRule(String line, bool isException) {
-    var filter = line.substring(1);
-    final rule = BlockRule(
-      filter: filter,
-      isException: isException,
-    );
-
-    if (isException) {
-      _exceptionUrls.add(rule);
-    } else {
-      _urlsToBlock.add(rule);
-    }
+    return true;
   }
 
   bool _domainMatches(String ruleDomain, String targetDomain) {
@@ -162,57 +84,14 @@ class EasylistParser {
     return applicableRules;
   }
 
-  List<BlockRule> getBlockRules() {
-    return _urlsToBlock
-        .where((rule) => !_exceptionUrls
-            .any((exRule) => rule.filter.contains(exRule.filter)))
-        .toList();
+  List<ResourceRule> getAllResourceRules() {
+    return [..._resourceRules, ..._resourceExceptionRules];
   }
-}
 
-class BlockRule {
-  final String filter;
-  final bool isException;
-  final bool isThirdParty;
-  final ResourceType resourceType;
-  final DomainOptions? domains;
-
-  BlockRule({
-    required this.filter,
-    this.isException = false,
-    this.isThirdParty = false,
-    this.resourceType = ResourceType.any,
-    this.domains,
-  });
-
-  bool matchesDomain(String domain) {
-    if (domains == null) return true;
-
-    if (domains!.excludeDomains.any((d) => domain.endsWith(d))) {
-      return false;
-    }
-
-    if (domains!.includeDomains.isEmpty) return true;
-    return domains!.includeDomains.any((d) => domain.endsWith(d));
+  bool shouldBlockResource(String url) {
+    final isException =
+        _resourceExceptionRules.any((rule) => _domainMatches(rule.url, url));
+    if (isException) return false;
+    return _resourceRules.any((rule) => _domainMatches(rule.url, url));
   }
-}
-
-class DomainOptions {
-  final List<String> includeDomains;
-  final List<String> excludeDomains;
-
-  DomainOptions({
-    this.includeDomains = const [],
-    this.excludeDomains = const [],
-  });
-}
-
-enum ResourceType {
-  any,
-  script,
-  image,
-  stylesheet,
-  xhr,
-  subdocument,
-  websocket,
 }
