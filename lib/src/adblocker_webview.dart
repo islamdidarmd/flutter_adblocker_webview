@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:adblocker_core/adblocker_core.dart';
 import 'package:adblocker_core/resource_rules_parser.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
+import 'package:adblocker_webview/src/block_resource_loading.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:adblocker_webview/src/elem_hide.dart';
-import 'package:adblocker_webview/src/js.dart';
 import 'package:adblocker_webview/src/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -137,16 +137,23 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
           return NavigationDecision.navigate;
         },
         onPageStarted: (url) async {
+          if (widget.shouldBlockAds) {
+            // Inject resource blocking script as early as possible
+            unawaited(
+              _webViewController
+                  .runJavaScript(getResourceLoadingBlockerScript(_urlsToBlock)),
+            );
+          }
           widget.onLoadStart?.call(url);
         },
         onPageFinished: (url) {
-          /* unawaited(_webViewController
-                .runJavaScript(getResourceLoadingBlockerScript(_urlsToBlock))); */
-
-          // Extract domain from full URL
-          final cssRules = parser.getCSSRulesForWebsite(url);
-          unawaited(
-              _webViewController.runJavaScript(generateHidingScript(cssRules)));
+          if (widget.shouldBlockAds) {
+            // Apply element hiding after page load
+            final cssRules = parser.getCSSRulesForWebsite(url);
+            unawaited(
+              _webViewController.runJavaScript(generateHidingScript(cssRules)),
+            );
+          }
 
           widget.onLoadFinished?.call(url);
         },

@@ -1,5 +1,19 @@
-(function () {
-    const rules = window.adBlockerRules || [];
+import 'package:adblocker_core/resource_rules_parser.dart';
+
+String getResourceLoadingBlockerScript(List<ResourceRule> rules) {
+  // Convert ResourceRules to JavaScript objects
+  final jsRules = rules.map((rule) => '''
+    {
+      url: '${rule.url}',
+      isException: ${rule.isException}
+    }
+  ''').join(',\n');
+
+  final content = '''
+    window.adBlockerRules = [$jsRules];
+    
+    function setupResourceBlocking() {
+        const rules = window.adBlockerRules || [];
     
     function domainMatches(rule, target) {
         return rule === target || target.includes(rule);
@@ -12,7 +26,7 @@
         });
         
         if (isException) {
-            console.log(`[EXCEPTION][${originType}] ${url}`, {
+            console.log(`[EXCEPTION][\${originType}] \${url}`, {
                 domain: url,
                 currentDomain: window.location.hostname
             });
@@ -25,7 +39,7 @@
         });
 
         if (blockedRule) {
-            console.log(`[BLOCKED][${originType}] ${url}`, {
+            console.log(`[BLOCKED][\${originType}] \${url}`, {
                 domain: url,
                 rule: blockedRule.url,
                 currentDomain: window.location.hostname
@@ -95,4 +109,61 @@
     });
 
     console.log('[AdBlocker] Resource blocking initialized with', rules.length, 'rules');
-})();
+    }
+  ''';
+
+  return '''
+    (function () {
+        // Listening for the appearance of the body element to execute the script as early as possible
+        const config = { attributes: false, childList: true, subtree: true };
+        const callback = function (mutationsList, observer) {
+            for (const mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    if (document.getElementsByTagName('body')[0]) {
+                        console.log('[AdBlocker] Body element detected, initializing blocking');
+                        script();
+                        observer.disconnect();
+                    }
+                    break;
+                }
+            }
+        };
+        const observer = new MutationObserver(callback);
+        observer.observe(document, config);
+
+        const onReadystatechange = function () {
+            if (document.readyState == 'interactive') {
+                script();
+            }
+        }
+
+        const addListeners = function () {
+            document.addEventListener('readystatechange', onReadystatechange);
+            document.addEventListener('DOMContentLoaded', script, false);
+            window.addEventListener('load', script);
+        }
+
+        const removeListeners = function () {
+            document.removeEventListener('readystatechange', onReadystatechange);
+            document.removeEventListener('DOMContentLoaded', script, false);
+            window.removeEventListener('load', script);
+        }
+
+        const script = function () {
+            try {
+                $content
+                setupResourceBlocking();
+            } catch (error) {
+                console.error('[AdBlocker] Setup error:', error);
+            }
+            removeListeners();
+        }
+
+        if (document.readyState == 'interactive' || document.readyState == 'complete') {
+            script();
+        } else {
+            addListeners();
+        }
+    })();
+  ''';
+}
