@@ -1,19 +1,10 @@
-final cssRulePattern = RegExp(r'^([^#]*)(##|#@#|#\?#)(.+)$');
+import 'package:adblocker_core/src/rules/css_rule.dart';
 
-class CSSRule {
-  CSSRule({
-    required this.domain,
-    required this.selector,
-    this.isException = false,
-  });
-  final List<String> domain;
-  final String selector;
-  final bool isException;
-}
+final _cssRulePattern = RegExp(r'^([^#]*)(##|#@#|#\?#)(.+)$');
 
 class CSSRulesParser {
   CSSRule? parseLine(String line) {
-    final match = cssRulePattern.firstMatch(line);
+    final match = _cssRulePattern.firstMatch(line);
     if (match == null) return null;
 
     final domainGroup = match.group(1);
