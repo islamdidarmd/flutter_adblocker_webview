@@ -4,15 +4,12 @@ version: 0.0.3
 homepage: "none"
 
 environment:
-  sdk: ^3.6.0
-  flutter: 3.27.1
+  sdk: ^3.7.0
+  flutter: ^3.27.1
 resolution: workspace
 
 dependencies:
   flutter:
     sdk: flutter
 
-flutter:
-  assets:
-    - assets/adguard_base.txt
-    - assets/easylist.txt
+
