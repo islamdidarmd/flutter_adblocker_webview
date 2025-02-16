@@ -1,13 +1,12 @@
-import 'package:adblocker_core/src/core.dart';
+import 'package:adblocker_core/src/adblocker_filter.dart';
 import 'package:adblocker_core/src/parser/css_rules_parser.dart';
 import 'package:adblocker_core/src/parser/resource_rules_parser.dart';
 import 'package:adblocker_core/src/rules/css_rule.dart';
 import 'package:adblocker_core/src/rules/resource_rule.dart';
-import 'package:flutter/services.dart';
 
 final _commentPattern = RegExp(r'^\s*!.*');
 
-class AdlockerCoreImpl implements AdblockerCore {
+class AdblockerFilterImpl implements AdblockerFilter {
   final List<CSSRule> _cssRules = [];
   final List<ResourceRule> _resourceRules = [];
   final List<ResourceRule> _resourceExceptionRules = [];
@@ -15,10 +14,8 @@ class AdlockerCoreImpl implements AdblockerCore {
   final _resourceRulesParser = ResourceRulesParser();
 
   @override
-  Future<void> init() async {
-    final str = await rootBundle
-        .loadString('packages/adblocker_core/assets/easylist.txt');
-    _parseRules(str);
+  Future<void> init(String filterData) async {
+    _parseRules(filterData);
   }
 
   @override

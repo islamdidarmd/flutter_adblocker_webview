@@ -1,4 +1,4 @@
-import 'package:adblocker_core/resource_rules_parser.dart';
+import 'package:adblocker_manager/adblocker_manager.dart';
 
 String getResourceLoadingBlockerScript(List<ResourceRule> rules) {
   // Convert ResourceRules to JavaScript objects

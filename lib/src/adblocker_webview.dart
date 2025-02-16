@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:adblocker_core/adblocker_core.dart';
-import 'package:adblocker_core/resource_rules_parser.dart';
+import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/block_resource_loading.dart';
 import 'package:adblocker_webview/src/domain/entity/host.dart';
@@ -74,7 +73,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   late Future<void> _depsFuture;
   final List<ResourceRule> _urlsToBlock = [];
 
-  final EasylistParser parser = EasylistParser();
+  final AdblockFilterManager _adBlockManager = AdblockFilterManager();
 
   @override
   void initState() {
@@ -83,15 +82,18 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   }
 
   Future<void> _init() async {
-    await parser.init();
+    final config = FilterConfig(
+      filterTypes: [FilterType.easyList, FilterType.adGuard],
+    );
+    await _adBlockManager.init(config);
     _urlsToBlock
       ..clear()
-      ..addAll(parser.getAllResourceRules());
+      ..addAll(_adBlockManager.getAllResourceRules());
 
     _webViewController = WebViewController();
     await _webViewController.setOnConsoleMessage(
       (message) {
-        print('[FLUTTER_WEBVIEW_LOG]: ${message.message}');
+        debugLog('[FLUTTER_WEBVIEW_LOG]: ${message.message}');
       },
     );
     await _webViewController.setUserAgent(_getUserAgent());
@@ -129,7 +131,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     _webViewController.setNavigationDelegate(
       NavigationDelegate(
         onNavigationRequest: (request) {
-          final shouldBlock = parser.shouldBlockResource(request.url);
+          final shouldBlock = _adBlockManager.shouldBlockResource(request.url);
           if (shouldBlock) {
             debugLog('Blocking resource: ${request.url}');
             return NavigationDecision.prevent;
@@ -149,7 +151,7 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
         onPageFinished: (url) {
           if (widget.shouldBlockAds) {
             // Apply element hiding after page load
-            final cssRules = parser.getCSSRulesForWebsite(url);
+            final cssRules = _adBlockManager.getCSSRulesForWebsite(url);
             unawaited(
               _webViewController.runJavaScript(generateHidingScript(cssRules)),
             );
