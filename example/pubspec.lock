@@ -7,14 +7,21 @@ packages:
       path: "../packages/adblocker_core"
       relative: true
     source: path
-    version: "0.0.2"
+    version: "0.0.3"
+  adblocker_manager:
+    dependency: transitive
+    description:
+      path: "../packages/adblocker_manager"
+      relative: true
+    source: path
+    version: "0.0.1"
   adblocker_webview:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "1.2.1-beta"
+    version: "2.0.0-beta"
   async:
     dependency: transitive
     description:
@@ -471,5 +478,5 @@ packages:
     source: hosted
     version: "1.1.0"
 sdks:
-  dart: ">=3.7.0-0 <4.0.0"
+  dart: ">=3.7.0 <4.0.0"
   flutter: ">=3.27.1"
