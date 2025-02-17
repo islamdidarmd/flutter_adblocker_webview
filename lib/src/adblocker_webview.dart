@@ -16,7 +16,7 @@ class AdBlockerWebview extends StatefulWidget {
   const AdBlockerWebview({
     required this.adBlockerWebviewController,
     required this.shouldBlockAds,
-    required this.url,
+    this.url,
     this.initialHtmlData,
     this.onLoadStart,
     this.onLoadFinished,
@@ -26,13 +26,20 @@ class AdBlockerWebview extends StatefulWidget {
     this.additionalHostsToBlock = const [],
     super.key,
   }) : assert(
-            (url == null && initialHtmlData != null) ||
-                (url != null && initialHtmlData == null),
-            'Both url and initialHtmlData can not be non null');
+         url != null || initialHtmlData != null,
+         'Either url or initialHtmlData must be provided',
+       ),
+       assert(
+         !(url != null && initialHtmlData != null),
+         'Cannot provide both url and initialHtmlData',
+       );
 
-  /// Required: The initial [Uri] url that will be displayed in webview.
-  final Uri url;
+  /// The initial [Uri] url that will be displayed in webview.
+  /// Either this or [initialHtmlData] must be provided, but not both.
+  final Uri? url;
 
+  /// The initial HTML content to load in the webview.
+  /// Either this or [url] must be provided, but not both.
   final String? initialHtmlData;
 
   /// Required: The controller for [AdBlockerWebview].
@@ -57,10 +64,7 @@ class AdBlockerWebview extends StatefulWidget {
   final List<Host> additionalHostsToBlock;
 
   /// Invoked when a loading error occurred.
-  final void Function(
-    String? url,
-    int code,
-  )? onLoadError;
+  final void Function(String? url, int code)? onLoadError;
 
   @override
   State<AdBlockerWebview> createState() => _AdBlockerWebviewState();
@@ -91,17 +95,21 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
       ..addAll(_adBlockManager.getAllResourceRules());
 
     _webViewController = WebViewController();
-    await _webViewController.setOnConsoleMessage(
-      (message) {
-        debugLog('[FLUTTER_WEBVIEW_LOG]: ${message.message}');
-      },
-    );
+    await _webViewController.setOnConsoleMessage((message) {
+      debugLog('[FLUTTER_WEBVIEW_LOG]: ${message.message}');
+    });
     await _webViewController.setUserAgent(_getUserAgent());
     await _webViewController.setJavaScriptMode(JavaScriptMode.unrestricted);
 
     _setNavigationDelegate();
     widget.adBlockerWebviewController.setInternalController(_webViewController);
-    unawaited(_webViewController.loadRequest(widget.url));
+
+    // Load either URL or HTML content
+    if (widget.url != null) {
+      unawaited(_webViewController.loadRequest(widget.url!));
+    } else if (widget.initialHtmlData != null) {
+      unawaited(_webViewController.loadHtmlString(widget.initialHtmlData!));
+    }
   }
 
   @override
@@ -142,8 +150,9 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
           if (widget.shouldBlockAds) {
             // Inject resource blocking script as early as possible
             unawaited(
-              _webViewController
-                  .runJavaScript(getResourceLoadingBlockerScript(_urlsToBlock)),
+              _webViewController.runJavaScript(
+                getResourceLoadingBlockerScript(_urlsToBlock),
+              ),
             );
           }
           widget.onLoadStart?.call(url);
@@ -160,10 +169,11 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
           widget.onLoadFinished?.call(url);
         },
         onProgress: (progress) => widget.onProgress?.call(progress),
-        onHttpError: (error) => widget.onLoadError?.call(
-          error.request?.uri.toString(),
-          error.response?.statusCode ?? -1,
-        ),
+        onHttpError:
+            (error) => widget.onLoadError?.call(
+              error.request?.uri.toString(),
+              error.response?.statusCode ?? -1,
+            ),
         onUrlChange: (change) => widget.onUrlChanged?.call(change.url),
       ),
     );
@@ -173,11 +183,22 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     final osVersion = Platform.operatingSystemVersion;
 
     if (Platform.isAndroid) {
-      return 'Mozilla/5.0 (Linux; Android $osVersion) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36 MyFlutterApp/1.0';
+      // Chrome 120 is the latest stable version as of now
+      return 'Mozilla/5.0 (Linux; Android $osVersion) '
+          'AppleWebKit/537.36 (KHTML, like Gecko) '
+          'Chrome/120.0.0.0 Mobile Safari/537.36';
     } else if (Platform.isIOS) {
-      return 'Mozilla/5.0 (iPhone; CPU iPhone OS $osVersion like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Version/15.0 Mobile/15E148 Safari/604.1 MyFlutterApp/1.0';
+      // Convert iOS version format from 13.0.0 to 13_0_0
+      final iosVersion = osVersion.replaceAll('.', '_');
+      // iOS 17 with Safari 17 is the latest stable version
+      return 'Mozilla/5.0 (iPhone; CPU iPhone OS $iosVersion like Mac OS X) '
+          'AppleWebKit/605.1.15 (KHTML, like Gecko) '
+          'Version/17.0 Mobile/15E148 Safari/604.1';
     } else {
-      return 'Mozilla/5.0 ($osVersion; vendor; version) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 MyFlutterApp/1.0';
+      // Default to latest Chrome for other platforms
+      return 'Mozilla/5.0 ($osVersion) '
+          'AppleWebKit/537.36 (KHTML, like Gecko) '
+          'Chrome/120.0.0.0 Safari/537.36';
     }
   }
 }

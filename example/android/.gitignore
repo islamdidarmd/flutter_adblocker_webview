@@ -15,3 +15,6 @@ build/
 key.properties
 **/*.keystore
 **/*.jks
+
+# NDK build directory
+.cxx/
