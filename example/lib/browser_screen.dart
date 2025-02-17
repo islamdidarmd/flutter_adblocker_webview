@@ -18,6 +18,13 @@ class BrowserScreen extends StatefulWidget {
 class _BrowserScreenState extends State<BrowserScreen> {
   final _controller = AdBlockerWebviewController.instance;
   bool _canGoBack = false;
+  String _appbarUrl = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _appbarUrl = widget.url.host;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +43,7 @@ class _BrowserScreenState extends State<BrowserScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.url.host),
+          title: Text(_appbarUrl),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -75,7 +82,7 @@ class _BrowserScreenState extends State<BrowserScreen> {
           },
           onLoadFinished: (url) {
             debugPrint('Finished loading: $url');
-            _updateNavigationState();
+            _updateNavigationState(url);
           },
           onLoadError: (url, code) {
             debugPrint('Error loading: $url (code: $code)');
@@ -89,21 +96,22 @@ class _BrowserScreenState extends State<BrowserScreen> {
           onProgress: (progress) {
             debugPrint('Loading progress: $progress%');
           },
-          onUrlChanged: (_) {
-            _updateNavigationState();
+          onUrlChanged: (url) {
+            _updateNavigationState(url);
           },
         ),
       ),
     );
   }
 
-  Future<void> _updateNavigationState() async {
+  Future<void> _updateNavigationState(String? url) async {
     if (!mounted) return;
 
     final canGoBack = await _controller.canGoBack();
     if (canGoBack != _canGoBack) {
       setState(() {
         _canGoBack = canGoBack;
+        _appbarUrl = Uri.tryParse(url ?? "")?.host ?? "";
       });
     }
   }
