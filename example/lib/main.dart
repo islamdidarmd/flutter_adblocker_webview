@@ -1,83 +1,92 @@
 import 'package:adblocker_webview/adblocker_webview.dart';
-import 'package:example/browser.dart';
-import 'package:example/url_input.dart';
 import 'package:flutter/material.dart';
 
+import 'browser_screen.dart';
+import 'url_input_section.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(const ExampleApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ExampleApp extends StatelessWidget {
+  const ExampleApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Adblocker Webview',
+      title: 'AdBlocker WebView Example',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Adblocker Webview'),
+      home: const HomePage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final _adBlockerWebviewController = AdBlockerWebviewController.instance;
-  bool _showBrowser = false;
-  bool _shouldBlockAds = false;
-  String _url = "";
-
-  @override
-  void initState() {
-    super.initState();
-    _adBlockerWebviewController.initialize();
-  }
+class _HomePageState extends State<HomePage> {
+  bool _shouldBlockAds = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      floatingActionButton: _showBrowser
-          ? FloatingActionButton(
-              child: const Icon(Icons.edit),
-              onPressed: () {
-                setState(() {
-                  _showBrowser = false;
-                });
-              },
-            )
-          : null,
-      body: _showBrowser
-          ? Browser(
-              url: _url,
-              controller: _adBlockerWebviewController,
-              shouldBlockAds: _shouldBlockAds,
-            )
-          : UrlInput(
-              onSubmit: (url) {
-                setState(() {
-                  _url = url;
-                  _showBrowser = true;
-                });
-              },
-              onBlockAdsStatusChange: (shouldBlockAds) {
-                setState(() {
-                  _shouldBlockAds = shouldBlockAds;
-                });
-              },
-              shouldBlockAds: _shouldBlockAds,
+      appBar: AppBar(
+        title: const Text('AdBlocker WebView Example'),
+        actions: [
+          Row(
+            children: [
+              const Text('Block Ads'),
+              Switch(
+                value: _shouldBlockAds,
+                onChanged: (value) {
+                  setState(() {
+                    _shouldBlockAds = value;
+                  });
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'Enter a URL to test ad blocking',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                UrlInputSection(
+                  onUrlSubmitted: (url) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (context) => BrowserScreen(
+                          url: url,
+                          shouldBlockAds: _shouldBlockAds,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
+          ),
+        ),
+      ),
     );
   }
 }

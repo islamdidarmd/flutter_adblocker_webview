@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      FLUTTER_VERSION: '3.19.5'  # Update with your desired default version
+      FLUTTER_VERSION: '3.29.0'  # Update with your desired default version
 
     steps:
       - uses: actions/checkout@v4
