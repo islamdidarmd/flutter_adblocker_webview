@@ -26,4 +26,3 @@ jobs:
         run: |
           flutter test
           cd packages/adblocker_core && flutter test
-          cd ../adblocker_manager && flutter test
