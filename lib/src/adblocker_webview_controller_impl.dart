@@ -118,4 +118,13 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
 
     return _webViewController!.reload();
   }
+
+  @override
+  Future<void> runScript(String script) async {
+    if (_webViewController == null) {
+      return;
+    }
+
+    return _webViewController!.runJavaScript(script);
+  }
 }

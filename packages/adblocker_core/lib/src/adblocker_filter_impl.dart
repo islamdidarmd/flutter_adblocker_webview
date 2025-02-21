@@ -41,9 +41,7 @@ class AdblockerFilterImpl implements AdblockerFilter {
 
     applicableExceptionRules.keys.forEach(applicableRules.remove);
 
-    return applicableRules
-      ..add('.ads')
-      ..add('#anchor-container');
+    return applicableRules;
   }
 
   @override
