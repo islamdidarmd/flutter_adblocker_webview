@@ -69,4 +69,7 @@ abstract interface class AdBlockerWebviewController
 
   /// Reloads the current page
   Future<void> reload();
+
+  /// Runs the given script
+  Future<void> runScript(String script);
 }

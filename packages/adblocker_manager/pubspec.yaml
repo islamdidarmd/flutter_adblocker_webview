@@ -1,6 +1,6 @@
 name: adblocker_manager
 description: "Manager package for handling multiple ad-blocking filters"
-version: 0.0.1
+version: 1.0.0
 homepage: "none"
 
 environment:
@@ -10,8 +10,7 @@ environment:
 resolution: workspace
 
 dependencies:
-  adblocker_core:
-    path: ../adblocker_core
+  adblocker_core: ^0.1.0
   flutter:
     sdk: flutter
 

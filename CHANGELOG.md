@@ -1,5 +1,11 @@
-## 1.2.0
-* Added support for HTML string loading
+## 2.0.0-beta
+* Added support for easylist and adguard filters
+* Added support for resource rules parsing
+* Removed third party package dependency and using official webview_flutter package
+
+**Breaking Changes**
+* Minimum Supported flutter version is 3.27.1
+* Minimum Supported dart version is 3.7.0
 
 ## 1.1.2
 * Removed redundant isolate uses

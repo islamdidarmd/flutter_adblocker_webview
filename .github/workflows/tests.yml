@@ -23,4 +23,7 @@ jobs:
         run: flutter pub get
 
       - name: Run tests
-        run: flutter test
+        run: |
+          flutter test
+          cd packages/adblocker_core && flutter test
+          cd ../adblocker_manager && flutter test

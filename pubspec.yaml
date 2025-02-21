@@ -13,8 +13,7 @@ workspace:
   - packages/adblocker_manager
 
 dependencies:
-  adblocker_manager:
-    path: packages/adblocker_manager
+  adblocker_manager: ^1.0.0
   flutter:
     sdk: flutter
 

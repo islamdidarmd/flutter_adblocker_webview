@@ -1,6 +1,6 @@
 name: adblocker_core
 description: "Core package for adblocker webview"
-version: 0.0.3
+version: 0.1.0
 homepage: "none"
 
 environment:
@@ -10,6 +10,9 @@ resolution: workspace
 
 dependencies:
   flutter:
+    sdk: flutter
+dev_dependencies:
+  flutter_test:
     sdk: flutter
 
 
