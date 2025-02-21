@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:adblocker_webview/adblocker_webview.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller_impl.dart';
 import 'package:adblocker_webview/src/internal_adblocker_webview_controller.dart';
@@ -15,7 +16,7 @@ import 'package:adblocker_webview/src/internal_adblocker_webview_controller.dart
 ///   @override
 ///   void initState() {
 ///     super.initState();
-///     _adBlockerWebviewController.initialize();
+///     _adBlockerWebviewController.initialize(config, []);
 ///     /// ... Other code here.
 ///   }
 /// ```
@@ -34,12 +35,11 @@ abstract interface class AdBlockerWebviewController
     return _instance!;
   }
 
-  /// Returns the banned host list.
-  /// This list items are populated after calling the [initialize] method
-  UnmodifiableListView<Host> get bannedHost;
-
   /// Initializes the controller
-  Future<void> initialize();
+  Future<void> initialize(
+    FilterConfig filterConfig,
+    List<ResourceRule> additionalResourceRules,
+  );
 
   /// Returns decision of if the webview can go back
   Future<bool> canGoBack();
@@ -50,22 +50,29 @@ abstract interface class AdBlockerWebviewController
   // Clears the cache of webview
   Future<void> clearCache();
 
+  /// Returns the banned resource rules list.
+  /// This list items are populated after calling the [initialize] method
+  UnmodifiableListView<ResourceRule> get bannedResourceRules;
+
   // Returns the title of currently loaded webpage
   Future<String?> getTitle();
 
   // Loads the given url
   Future<void> loadUrl(String url);
 
-  Future<void> loadData(
-    String data, {
-    String? baseUrl,
-  });
+  Future<void> loadData(String data, {String? baseUrl});
+
+  /// Returns the css rules for the given url
+  List<String> getCssRulesForWebsite(String url);
 
   /// Navigates webview to previous page
   Future<void> goBack();
 
   /// Navigates the webview to forward page
   Future<void> goForward();
+
+  /// Returns decision of if the resource should be blocked
+  bool shouldBlockResource(String url);
 
   /// Reloads the current page
   Future<void> reload();
