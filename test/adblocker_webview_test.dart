@@ -1,14 +1,41 @@
 import 'package:adblocker_webview/adblocker_webview.dart';
-import 'package:adblocker_webview/src/adblocker_webview_controller_impl.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'fakes/fake_adblocker_repository_impl.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
-  test('Test controller initializes successfully', () async {
-    final AdBlockerWebviewController instance = AdBlockerWebviewControllerImpl(
-      repository: FakeAdBlockerRepositoryImpl(),
+  group('AdBlockerWebview', () {
+    late AdBlockerWebviewController controller;
+
+    setUp(() {
+      controller = AdBlockerWebviewController.instance;
+    });
+
+    testWidgets('throws assertion error when both url and htmlData provided', (
+      tester,
+    ) async {
+      expect(
+        () => AdBlockerWebview(
+          url: Uri.parse('https://example.com'),
+          initialHtmlData: '<html><body>Test</body></html>',
+          shouldBlockAds: true,
+          adBlockerWebviewController: controller,
+        ),
+        throwsAssertionError,
+      );
+    });
+
+    testWidgets(
+      'throws assertion error when neither url nor htmlData provided',
+      (tester) async {
+        expect(
+          () => AdBlockerWebview(
+            shouldBlockAds: true,
+            adBlockerWebviewController: controller,
+          ),
+          throwsAssertionError,
+        );
+      },
     );
-    await instance.initialize();
   });
 }
