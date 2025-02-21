@@ -1,10 +1,17 @@
+import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:adblocker_webview/adblocker_webview.dart';
 import 'package:flutter/material.dart';
 
 import 'browser_screen.dart';
 import 'url_input_section.dart';
 
-void main() {
+void main() async {
+  await AdBlockerWebviewController.instance.initialize(
+    FilterConfig(
+      filterTypes: [FilterType.easyList, FilterType.adGuard],
+    ),
+    [],
+  );
   runApp(const ExampleApp());
 }
 

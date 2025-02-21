@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/block_resource_loading.dart';
-import 'package:adblocker_webview/src/domain/entity/host.dart';
 import 'package:adblocker_webview/src/elem_hide.dart';
 import 'package:adblocker_webview/src/logger.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +22,6 @@ class AdBlockerWebview extends StatefulWidget {
     this.onProgress,
     this.onLoadError,
     this.onUrlChanged,
-    this.additionalHostsToBlock = const [],
     super.key,
   }) : assert(
          url != null || initialHtmlData != null,
@@ -61,8 +59,6 @@ class AdBlockerWebview extends StatefulWidget {
   /// Invoked when the page title is changed.
   final void Function(String? url)? onUrlChanged;
 
-  final List<Host> additionalHostsToBlock;
-
   /// Invoked when a loading error occurred.
   final void Function(String? url, int code)? onLoadError;
 
@@ -77,8 +73,6 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   late Future<void> _depsFuture;
   final List<ResourceRule> _urlsToBlock = [];
 
-  final AdblockFilterManager _adBlockManager = AdblockFilterManager();
-
   @override
   void initState() {
     super.initState();
@@ -86,20 +80,18 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   }
 
   Future<void> _init() async {
-    final config = FilterConfig(
-      filterTypes: [FilterType.easyList, FilterType.adGuard],
-    );
-    await _adBlockManager.init(config);
     _urlsToBlock
       ..clear()
-      ..addAll(_adBlockManager.getAllResourceRules());
+      ..addAll(widget.adBlockerWebviewController.bannedResourceRules);
 
     _webViewController = WebViewController();
-    await _webViewController.setOnConsoleMessage((message) {
-      debugLog('[FLUTTER_WEBVIEW_LOG]: ${message.message}');
-    });
-    await _webViewController.setUserAgent(_getUserAgent());
-    await _webViewController.setJavaScriptMode(JavaScriptMode.unrestricted);
+    await Future.wait([
+      _webViewController.setOnConsoleMessage((message) {
+        debugLog('[FLUTTER_WEBVIEW_LOG]: ${message.message}');
+      }),
+      _webViewController.setUserAgent(_getUserAgent()),
+      _webViewController.setJavaScriptMode(JavaScriptMode.unrestricted),
+    ]);
 
     _setNavigationDelegate();
     widget.adBlockerWebviewController.setInternalController(_webViewController);
@@ -139,7 +131,8 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
     _webViewController.setNavigationDelegate(
       NavigationDelegate(
         onNavigationRequest: (request) {
-          final shouldBlock = _adBlockManager.shouldBlockResource(request.url);
+          final shouldBlock = widget.adBlockerWebviewController
+              .shouldBlockResource(request.url);
           if (shouldBlock) {
             debugLog('Blocking resource: ${request.url}');
             return NavigationDecision.prevent;
@@ -160,7 +153,8 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
         onPageFinished: (url) {
           if (widget.shouldBlockAds) {
             // Apply element hiding after page load
-            final cssRules = _adBlockManager.getCSSRulesForWebsite(url);
+            final cssRules =
+                widget.adBlockerWebviewController.getCssRulesForWebsite(url);
             unawaited(
               _webViewController.runJavaScript(generateHidingScript(cssRules)),
             );
