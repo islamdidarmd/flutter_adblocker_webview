@@ -1,4 +1,4 @@
-export 'package:adblocker_core/adlocker_core.dart';
+export 'package:adblocker_core/adblocker_core.dart';
 
 export 'src/config/filter_config.dart';
 export 'src/config/filter_type.dart';

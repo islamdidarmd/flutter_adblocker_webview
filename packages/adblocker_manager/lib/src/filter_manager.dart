@@ -1,4 +1,4 @@
-import 'package:adblocker_core/adlocker_core.dart';
+import 'package:adblocker_core/adblocker_core.dart';
 import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:flutter/services.dart';
 
