@@ -1,32 +1,32 @@
 import 'dart:collection';
 
-import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
-import 'package:adblocker_webview/src/data/repository/adblocker_repository_impl.dart';
-import 'package:adblocker_webview/src/domain/entity/host.dart';
-import 'package:adblocker_webview/src/domain/repository/adblocker_repository.dart';
+import 'package:adblocker_manager/adblocker_manager.dart';
+import 'package:adblocker_webview/adblocker_webview.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 ///Implementation for [AdBlockerWebviewController]
 class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
-  AdBlockerWebviewControllerImpl({AdBlockerRepository? repository})
-      : _repository = repository ?? AdBlockerRepositoryImpl();
-  final AdBlockerRepository _repository;
+  AdBlockerWebviewControllerImpl();
 
   WebViewController? _webViewController;
-
-  final _bannedHost = <Host>[];
-
-  @override
-  UnmodifiableListView<Host> get bannedHost =>
-      UnmodifiableListView(_bannedHost);
+  final AdblockFilterManager _adBlockManager = AdblockFilterManager();
+  final _bannedResourceRules = <ResourceRule>[];
 
   @override
-  Future<void> initialize() async {
-    final hosts = await _repository.fetchBannedHostList();
-    _bannedHost
+  Future<void> initialize(
+    FilterConfig filterConfig,
+    List<ResourceRule> additionalResourceRules,
+  ) async {
+    await _adBlockManager.init(filterConfig);
+    _bannedResourceRules
       ..clear()
-      ..addAll(hosts);
+      ..addAll(_adBlockManager.getAllResourceRules())
+      ..addAll(additionalResourceRules);
   }
+
+  @override
+  UnmodifiableListView<ResourceRule> get bannedResourceRules =>
+      UnmodifiableListView(_bannedResourceRules);
 
   @override
   void setInternalController(WebViewController controller) {
@@ -59,6 +59,10 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
 
     return _webViewController!.clearCache();
   }
+
+  @override
+  List<String> getCssRulesForWebsite(String url) =>
+      _adBlockManager.getCSSRulesForWebsite(url);
 
   @override
   Future<String?> getTitle() async {
@@ -97,18 +101,16 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
   }
 
   @override
-  Future<void> loadData(
-    String data, {
-    String? baseUrl,
-  }) async {
+  Future<void> loadData(String data, {String? baseUrl}) async {
     if (_webViewController == null) {
       return;
     }
-    return _webViewController!.loadHtmlString(
-      data,
-      baseUrl: baseUrl,
-    );
+    return _webViewController!.loadHtmlString(data, baseUrl: baseUrl);
   }
+
+  @override
+  bool shouldBlockResource(String url) =>
+      _adBlockManager.shouldBlockResource(url);
 
   @override
   Future<void> reload() async {
