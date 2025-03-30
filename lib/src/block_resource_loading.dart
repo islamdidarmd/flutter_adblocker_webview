@@ -7,7 +7,7 @@ String getResourceLoadingBlockerScript(List<ResourceRule> rules) {
       url: '${rule.url}',
       isException: ${rule.isException}
     }
-  ''').join(',\n');
+  ''',).join(',\n');
 
   final content = '''
     window.adBlockerRules = [$jsRules];

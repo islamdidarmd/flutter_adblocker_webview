@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:adblocker_webview/adblocker_webview.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
