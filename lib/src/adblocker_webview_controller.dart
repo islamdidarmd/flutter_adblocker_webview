@@ -1,8 +1,6 @@
 import 'dart:collection';
 
-import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:adblocker_webview/adblocker_webview.dart';
-import 'package:adblocker_webview/src/adblocker_webview_controller_impl.dart';
 import 'package:adblocker_webview/src/internal_adblocker_webview_controller.dart';
 
 /// The controller for [AdBlockerWebview].

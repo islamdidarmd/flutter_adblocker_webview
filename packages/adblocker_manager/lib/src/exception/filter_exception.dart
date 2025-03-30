@@ -1,13 +1,13 @@
 /// Base class for all filter-related exceptions
 class FilterException implements Exception {
+
+  /// Creates a new [FilterException]
+  FilterException(this.message, [this.error]);
   /// Error message
   final String message;
 
   /// Optional error that caused this exception
   final Object? error;
-
-  /// Creates a new [FilterException]
-  FilterException(this.message, [this.error]);
 
   @override
   String toString() =>
@@ -16,6 +16,5 @@ class FilterException implements Exception {
 
 /// Exception thrown when filter initialization fails
 class FilterInitializationException extends FilterException {
-  FilterInitializationException(String message, [Object? error])
-      : super(message, error);
+  FilterInitializationException(super.message, [super.error]);
 }

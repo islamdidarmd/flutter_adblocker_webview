@@ -1,4 +1,3 @@
-import 'package:adblocker_manager/adblocker_manager.dart';
 import 'package:adblocker_webview/adblocker_webview.dart';
 import 'package:flutter/material.dart';
 

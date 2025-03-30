@@ -1,9 +1,7 @@
-import 'filter_type.dart';
+import 'package:adblocker_manager/src/config/filter_type.dart';
 
 /// Configuration for the AdblockFilterManager
 class FilterConfig {
-  /// List of filter types to be used
-  final List<FilterType> filterTypes;
 
   /// Creates a new [FilterConfig] instance
   ///
@@ -14,4 +12,6 @@ class FilterConfig {
           filterTypes.isNotEmpty,
           'At least one filter type must be specified',
         );
+  /// List of filter types to be used
+  final List<FilterType> filterTypes;
 }
