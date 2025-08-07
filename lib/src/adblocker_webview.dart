@@ -6,8 +6,11 @@ import 'package:adblocker_webview/src/adblocker_webview_controller.dart';
 import 'package:adblocker_webview/src/block_resource_loading.dart';
 import 'package:adblocker_webview/src/elem_hide.dart';
 import 'package:adblocker_webview/src/logger.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 /// A webview implementation of in Flutter that blocks most of the ads that
 /// appear inside of the webpages.
@@ -84,7 +87,25 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
       ..clear()
       ..addAll(widget.adBlockerWebviewController.bannedResourceRules);
 
-    _webViewController = WebViewController();
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    _webViewController = WebViewController.fromPlatformCreationParams(params);
+    // ···
+    if (_webViewController.platform is AndroidWebViewController) {
+      unawaited(AndroidWebViewController.enableDebugging(kDebugMode));
+      unawaited(
+        (_webViewController.platform as AndroidWebViewController)
+            .setMediaPlaybackRequiresUserGesture(true),
+      );
+    }
+
     await Future.wait([
       _webViewController.setOnConsoleMessage((message) {
         debugLog('[FLUTTER_WEBVIEW_LOG]: ${message.message}');
@@ -128,49 +149,54 @@ class _AdBlockerWebviewState extends State<AdBlockerWebview> {
   }
 
   void _setNavigationDelegate() {
-    _webViewController.setNavigationDelegate(
-      NavigationDelegate(
-        onNavigationRequest: (request) {
-          final shouldBlock = widget.adBlockerWebviewController
-              .shouldBlockResource(request.url);
-          if (shouldBlock) {
-            debugLog('Blocking resource: ${request.url}');
-            return NavigationDecision.prevent;
-          }
-          return NavigationDecision.navigate;
-        },
-        onPageStarted: (url) async {
-          if (widget.shouldBlockAds) {
-            // Inject resource blocking script as early as possible
-            unawaited(
-              _webViewController.runJavaScript(
-                getResourceLoadingBlockerScript(_urlsToBlock),
-              ),
-            );
-          }
-          widget.onLoadStart?.call(url);
-        },
-        onPageFinished: (url) {
-          if (widget.shouldBlockAds) {
-            // Apply element hiding after page load
-            final cssRules =
-                widget.adBlockerWebviewController.getCssRulesForWebsite(url);
-            unawaited(
-              _webViewController.runJavaScript(generateHidingScript(cssRules)),
-            );
-          }
-
-          widget.onLoadFinished?.call(url);
-        },
-        onProgress: (progress) => widget.onProgress?.call(progress),
-        onHttpError:
-            (error) => widget.onLoadError?.call(
-              error.request?.uri.toString(),
-              error.response?.statusCode ?? -1,
+    final navigationDelegate = NavigationDelegate(
+      onNavigationRequest: (request) {
+        final shouldBlock = widget.adBlockerWebviewController
+            .shouldBlockResource(request.url);
+        if (shouldBlock) {
+          debugLog('Blocking resource: ${request.url}');
+          return NavigationDecision.prevent;
+        }
+        return NavigationDecision.navigate;
+      },
+      onPageStarted: (url) async {
+        if (widget.shouldBlockAds) {
+          // Inject resource blocking script as early as possible
+          unawaited(
+            _webViewController.runJavaScript(
+              getResourceLoadingBlockerScript(_urlsToBlock),
             ),
-        onUrlChange: (change) => widget.onUrlChanged?.call(change.url),
+          );
+        }
+        widget.onLoadStart?.call(url);
+      },
+      onPageFinished: (url) {
+        if (widget.shouldBlockAds) {
+          // Apply element hiding after page load
+          final cssRules = widget.adBlockerWebviewController
+              .getCssRulesForWebsite(url);
+          unawaited(
+            _webViewController.runJavaScript(generateHidingScript(cssRules)),
+          );
+        }
+
+        widget.onLoadFinished?.call(url);
+      },
+      onProgress: (progress) => widget.onProgress?.call(progress),
+      onHttpError: (error) => widget.onLoadError?.call(
+        error.request?.uri.toString(),
+        error.response?.statusCode ?? -1,
       ),
+      onUrlChange: (change) => widget.onUrlChanged?.call(change.url),
     );
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      final WebKitNavigationDelegate webKitDelegate =
+          navigationDelegate.platform as WebKitNavigationDelegate;
+    } else if (WebViewPlatform.instance is AndroidWebViewPlatform) {
+      final AndroidNavigationDelegate androidDelegate =
+          navigationDelegate.platform as AndroidNavigationDelegate;
+    }
+    _webViewController.setNavigationDelegate(navigationDelegate);
   }
 
   String _getUserAgent() {

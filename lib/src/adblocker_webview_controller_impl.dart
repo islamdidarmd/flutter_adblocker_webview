@@ -2,6 +2,8 @@ import 'dart:collection';
 
 import 'package:adblocker_webview/adblocker_webview.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 ///Implementation for [AdBlockerWebviewController]
 class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
@@ -21,6 +23,7 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
       ..clear()
       ..addAll(_adBlockManager.getAllResourceRules())
       ..addAll(additionalResourceRules);
+
   }
 
   @override
@@ -118,6 +121,14 @@ class AdBlockerWebviewControllerImpl implements AdBlockerWebviewController {
     }
 
     return _webViewController!.reload();
+  }
+
+  @override
+  Future<void> stopLoading() async {
+    if (_webViewController == null) {
+      return;
+    }
+    return _webViewController!.runJavaScript('window.stop();');
   }
 
   @override
