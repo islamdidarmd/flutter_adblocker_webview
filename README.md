@@ -23,7 +23,7 @@ Add this to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  adblocker_webview: ^1.0.0
+  adblocker_webview: ^2.1.0
 ```
 
 ### Basic Usage
@@ -130,7 +130,7 @@ AdBlockerWebview(
 
 ## Migration Guide
 
-### Migrating from 1.2.0 to 2.0.0-beta
+### Migrating from 1.2.0 to 2.0.0
 
 #### Breaking Changes
 
@@ -206,7 +206,7 @@ AdBlockerWebview(
 1. Update the package version in `pubspec.yaml`:
    ```yaml
    dependencies:
-     adblocker_webview: ^2.0.0-beta
+     adblocker_webview: ^2.0.0
    ```
 
 2. Replace controller initialization with singleton pattern
